@@ -12,16 +12,20 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import fr.prcaen.externalresources.converter.Converter;
+import fr.prcaen.externalresources.converter.JsonConverter;
 import fr.prcaen.externalresources.listener.OnExternalResourcesChangeListener;
 import fr.prcaen.externalresources.listener.OnExternalResourcesLoadListener;
 import fr.prcaen.externalresources.model.DimensionResource;
+import fr.prcaen.externalresources.model.Resource;
 import fr.prcaen.externalresources.model.Resources;
 import fr.prcaen.externalresources.url.DefaultUrl;
 import fr.prcaen.externalresources.url.Url;
 
 @SuppressWarnings("UnusedDeclaration")
 public class ExternalResources {
-  private static final String TAG = "ExternalResources";
+  public static final String TAG = "ExternalResources";
+
   private static final String THREAD_NAME = "ExternalResourcesThread";
   private static final String EXCEPTION_NOT_LOADED = "Resources are null.";
 
@@ -44,10 +48,12 @@ public class ExternalResources {
   @NonNull
   private Configuration configuration;
 
-  private ExternalResources(@NonNull Context context, @NonNull Url url, @Cache.Policy int policy, @NonNull Resources defaultResources, @NonNull Options options, @Nullable OnExternalResourcesLoadListener listener) {
+  private ExternalResources(@NonNull Context context, @NonNull Converter converter, @NonNull Url url, @NonNull Options options, @Cache.Policy int policy, @Logger.Level int logLevel, @NonNull Resources defaultResources, @Nullable OnExternalResourcesLoadListener listener) {
+    Logger.setLevel(logLevel);
+
     this.configuration = new Configuration(context.getResources().getConfiguration());
     this.metrics = context.getResources().getDisplayMetrics();
-    this.downloader = new Downloader(context, url, policy, options);
+    this.downloader = new Downloader(context, converter, url, options, policy);
     this.defaultResources = defaultResources;
     this.resources = defaultResources;
     this.options = options;
@@ -57,66 +63,108 @@ public class ExternalResources {
   }
 
   public void onConfigurationChanged(Configuration newConfig) {
+    Logger.d(TAG, "onConfigurationChanged");
+
     if (shouldRelaunch(newConfig)) {
+      Logger.v(TAG, "Relaunch");
+
       launch();
     }
 
     this.configuration = new Configuration(newConfig);
   }
 
-  public boolean getBoolean(@NonNull String key) throws Resources.NotFoundException {
-    return resources.getBoolean(key);
+  public void setLogLevel(@Logger.Level int logLevel) {
+    Logger.setLevel(logLevel);
+  }
+
+  public boolean getBoolean(@NonNull String key) throws NotFoundException {
+    Resource resource = resources.get(key);
+    if (resource != null) {
+      return resource.getAsBoolean();
+    }
+
+    throw new NotFoundException("Boolean resource with key: " + key);
   }
 
   @ColorInt
-  public int getColor(@NonNull String key) throws Resources.NotFoundException {
-    return resources.getInteger(key);
+  public int getColor(@NonNull String key) throws NotFoundException {
+    Resource resource = resources.get(key);
+    if (resource != null) {
+      return resource.getAsInt();
+    }
+
+    throw new NotFoundException("Integer resource with key: " + key);
   }
 
-  public float getDimension(@NonNull String key) throws Resources.NotFoundException {
+  public float getDimension(@NonNull String key) throws NotFoundException {
     String raw = getString(key);
 
     try {
       return DimensionResource.fromString(raw).toFloat(metrics);
     } catch (IllegalArgumentException e) {
-      throw new Resources.NotFoundException("Dimension resource with key: " + key);
+      throw new NotFoundException("Dimension resource with key: " + key);
     }
   }
 
-  public String getString(@NonNull String key) throws Resources.NotFoundException {
-    return resources.getString(key);
+  public String getString(@NonNull String key) throws NotFoundException {
+    Resource resource = resources.get(key);
+    if (resource != null) {
+      return resource.getAsString();
+    }
+
+    throw new NotFoundException("String resource with key: " + key);
   }
 
-  public String getString(@NonNull String key, Object... formatArgs) throws Resources.NotFoundException {
+  public String getString(@NonNull String key, Object... formatArgs) throws NotFoundException {
     String raw = getString(key);
     return String.format(configuration.locale, raw, formatArgs);
   }
 
-  public String[] getStringArray(@NonNull String key) throws Resources.NotFoundException {
-    return resources.getStringArray(key);
+  public String[] getStringArray(@NonNull String key) throws NotFoundException {
+    Resource resource = resources.get(key);
+    if (resource != null) {
+      return resource.getAsStringArray();
+    }
+
+    throw new NotFoundException("String array resource with key: " + key);
   }
 
-  public int getInteger(@NonNull String key) throws Resources.NotFoundException {
-    return resources.getInteger(key);
+  public int getInteger(@NonNull String key) throws NotFoundException {
+    Resource resource = resources.get(key);
+    if (resource != null) {
+      return resource.getAsInt();
+    }
+
+    throw new NotFoundException("Int resource with key: " + key);
   }
 
-  public int[] getIntArray(@NonNull String key) throws Resources.NotFoundException {
-    return resources.getIntArray(key);
+  public int[] getIntArray(@NonNull String key) throws NotFoundException {
+    Resource resource = resources.get(key);
+    if (resource != null) {
+      return resource.getAsIntegerArray();
+    }
+
+    throw new NotFoundException("Int array resource with key: " + key);
   }
 
   public void register(OnExternalResourcesChangeListener listener) {
+    Logger.v(TAG, "Register listener:" + listener.getClass().getSimpleName());
     listeners.add(listener);
   }
 
   public void unregister(OnExternalResourcesChangeListener listener) {
+    Logger.v(TAG, "Unregister listener:" + listener.getClass().getSimpleName());
     listeners.remove(listener);
   }
 
   private void launch() {
+    Logger.v(TAG, "Launch");
     ExecutorService pool = Executors.newSingleThreadExecutor();
     pool.submit(new ResourcesRunnable(downloader, new ResourcesRunnable.Listener() {
       @Override
       public void onResourcesLoadSuccess(Resources resources) {
+        Logger.i(TAG, "onResourcesLoadSuccess");
         ExternalResources.this.resources = defaultResources.merge(resources);
 
         triggerChange();
@@ -124,6 +172,8 @@ public class ExternalResources {
 
       @Override
       public void onResourcesLoadFailed(Exception exception) {
+        Logger.e(TAG, "onResourcesLoadFailed", exception);
+
         if (listener != null) {
           listener.onExternalResourcesLoadFailed(exception);
         }
@@ -154,12 +204,13 @@ public class ExternalResources {
   }
 
   private void triggerChange() {
-    if(listener != null) {
+    if (listener != null) {
       listener.onExternalResourcesChange(this);
     }
 
     for (OnExternalResourcesChangeListener listener : listeners) {
       if (listener != null) {
+        Logger.v(TAG, "Trigger change for listener: " + listener.getClass().getSimpleName());
         listener.onExternalResourcesChange(this);
       }
     }
@@ -219,12 +270,16 @@ public class ExternalResources {
 
     @Cache.Policy
     private int cachePolicy = Cache.POLICY_ALL;
+    @Logger.Level
+    private int logLevel = Logger.LEVEL_ERROR;
     @Nullable
     private Resources defaultResources;
     @Nullable
     private OnExternalResourcesLoadListener listener;
     @Nullable
     private Options options;
+    @Nullable
+    private Converter converter;
 
     public Builder(@NonNull Context context, @NonNull Url url) {
       if (context == null) {
@@ -291,6 +346,26 @@ public class ExternalResources {
       return this;
     }
 
+    public Builder logLevel(@Logger.Level int logLevel) {
+      this.logLevel = logLevel;
+
+      return this;
+    }
+
+    public Builder converter(@NonNull Converter converter) {
+      if (converter == null) {
+        throw new IllegalArgumentException("Converter must not be null.");
+      }
+
+      if (this.converter != null) {
+        throw new IllegalStateException("Converter already set.");
+      }
+
+      this.converter = converter;
+
+      return this;
+    }
+
     public ExternalResources build() {
       if (defaultResources == null) {
         this.defaultResources = new Resources();
@@ -300,7 +375,20 @@ public class ExternalResources {
         this.options = Options.createDefault();
       }
 
-      return new ExternalResources(context, url, cachePolicy, defaultResources, options, listener);
+      if (converter == null) {
+        this.converter = new JsonConverter();
+      }
+
+      return new ExternalResources(context, converter, url, options, cachePolicy, logLevel, defaultResources, listener);
+    }
+  }
+
+  public static class NotFoundException extends RuntimeException {
+    public NotFoundException() {
+    }
+
+    public NotFoundException(String name) {
+      super(name);
     }
   }
 }

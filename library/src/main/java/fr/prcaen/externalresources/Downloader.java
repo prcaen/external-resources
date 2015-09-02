@@ -3,6 +3,7 @@ package fr.prcaen.externalresources;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.support.annotation.NonNull;
 
 import com.squareup.okhttp.CacheControl;
 import com.squareup.okhttp.OkHttpClient;
@@ -12,6 +13,7 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import fr.prcaen.externalresources.converter.Converter;
 import fr.prcaen.externalresources.model.Resources;
 import fr.prcaen.externalresources.url.Url;
 
@@ -20,19 +22,26 @@ public final class Downloader {
   private static final int READ_TIMEOUT_MILLIS = 20 * 1000;    // 20s
   private static final int WRITE_TIMEOUT_MILLIS = 20 * 1000;   // 20s
 
+  @NonNull
+  private final OkHttpClient client = new OkHttpClient();
+
+  @NonNull
   private final Context context;
-  private final OkHttpClient client;
+  @NonNull
+  private final Converter converter;
+  @NonNull
   private final Url url;
+  @NonNull
   private final Options options;
   @Cache.Policy
   private final int policy;
 
-  public Downloader(Context context, Url url, @Cache.Policy int policy, Options options) {
+  public Downloader(@NonNull Context context, @NonNull Converter converter, @NonNull Url url, @NonNull Options options, @Cache.Policy int policy) {
     this.context = context;
-    this.client = new OkHttpClient();
     this.url = url;
     this.policy = policy;
     this.options = options;
+    this.converter = converter;
 
     Cache cache = new Cache(context);
 
@@ -44,6 +53,8 @@ public final class Downloader {
 
   public Resources load() throws IOException {
     prepareUrl();
+
+    Logger.i(ExternalResources.TAG, "Load configuration from url: " + url.build());
 
     final CacheControl cacheControl;
     switch (policy) {
@@ -59,6 +70,8 @@ public final class Downloader {
         break;
     }
 
+    Logger.v(ExternalResources.TAG, "CachePolicy: " + policy);
+
     Request request = new Request.Builder()
         .url(url.build())
         .cacheControl(cacheControl)
@@ -66,12 +79,14 @@ public final class Downloader {
 
     Response response = client.newCall(request).execute();
     int responseCode = response.code();
+
+    Logger.d(ExternalResources.TAG, "Response code: " + responseCode);
     if (responseCode >= 300) {
       response.body().close();
       throw new ResponseException(responseCode + " " + response.message(), policy, responseCode);
     }
 
-    return Resources.fromJson(response.body().charStream());
+    return converter.fromReader(response.body().charStream());
   }
 
   private void prepareUrl() {

@@ -1,100 +1,74 @@
 package fr.prcaen.externalresources.model;
 
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import fr.prcaen.externalresources.converter.Converter;
+import fr.prcaen.externalresources.converter.JsonConverter;
 
 public final class Resources {
-  private static final Gson gson = new Gson();
-
-  private final JsonObject elements;
+  private final HashMap<String, Resource> members;
 
   public Resources() {
-    this.elements = new JsonObject();
+    this.members = new HashMap<>();
   }
 
-  public Resources(@NonNull JsonObject resources) {
-    this.elements = resources;
+  public Resources(@NonNull HashMap<String, Resource> members) {
+    this.members = members;
   }
 
-  public JsonObject getElements() {
-    return elements;
+  public Resource add(String key, Resource value) {
+    return members.put(key, value);
   }
 
-  public boolean getBoolean(@NonNull String key) throws NotFoundException {
-    return getAs(key, boolean.class);
+  public Resource remove(String key) {
+    return members.remove(key);
   }
 
-  public String getString(@NonNull String key) throws NotFoundException {
-    return getAs(key, String.class);
+  public Set<Map.Entry<String, Resource>> entrySet() {
+    return members.entrySet();
   }
 
-  public int getInteger(@NonNull String key) throws NotFoundException {
-    return getAs(key, int.class);
+  public boolean has(String key) {
+    return members.containsKey(key);
   }
 
-  public String[] getStringArray(@NonNull String key) throws NotFoundException {
-    return getAs(key, String[].class);
+  public Resource get(String key) {
+    return members.get(key);
   }
 
-  public int[] getIntArray(@NonNull String key) throws NotFoundException {
-    return getAs(key, int[].class);
-  }
-
-  private <T> T getAs(@NonNull String key, Class<T> classOfT) {
-    if (!TextUtils.isEmpty(key)) {
-      JsonElement element = elements.get(key);
-
-      if (element != null) {
-        try {
-          gson.fromJson(element, classOfT);
-        } catch (JsonSyntaxException ignored) {
-        }
-      }
-    }
-
-    throw new NotFoundException(classOfT.getCanonicalName() + " resource with key: " + key);
+  public void putAll(Map<String, Resource> elements) {
+    members.putAll(elements);
   }
 
   public Resources merge(Resources resources) {
-    JsonObject elements = getElements();
-
-    for(Map.Entry<String, JsonElement> entry : resources.getElements().entrySet()) {
-      elements.add(entry.getKey(), entry.getValue());
+    for (Map.Entry<String, Resource> entry: resources.entrySet()) {
+      members.put(entry.getKey(), entry.getValue());
     }
 
-    return new Resources(elements);
+    return this;
   }
 
-  public static Resources fromJson(Reader json) {
-    return new Resources(gson.fromJson(json, JsonObject.class));
+  public static Resources from(String string, Converter converter) throws IOException {
+    return converter.fromString(string);
   }
 
-  public static Resources fromJson(InputStream stream) {
-    return fromJson(new InputStreamReader(stream));
+  public static Resources fromJson(String string) throws IOException {
+    return new JsonConverter().fromString(string);
   }
 
-  @SuppressWarnings("unused")
-  public static Resources fromJson(String json) {
-    return new Resources(gson.fromJson(json, JsonObject.class));
+  public static Resources fromJson(Reader reader) throws IOException {
+    return new JsonConverter().fromReader(reader);
   }
 
-  @SuppressWarnings("unused")
-  public static class NotFoundException extends RuntimeException {
-    public NotFoundException() {
-    }
-
-    public NotFoundException(String name) {
-      super(name);
-    }
+  public static Resources fromJson(InputStream reader) throws IOException {
+    return fromJson(new InputStreamReader(reader));
   }
 }

@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import fr.prcaen.externalresources.ExternalResources;
+import fr.prcaen.externalresources.ExternalResources.NotFoundException;
+import fr.prcaen.externalresources.Logger;
 import fr.prcaen.externalresources.Options;
 import fr.prcaen.externalresources.listener.OnExternalResourcesLoadListener;
 import fr.prcaen.externalresources.model.Resources;
@@ -44,14 +46,14 @@ public final class LocalizedStringResources implements OnExternalResourcesLoadLi
     Resources defaultResources = null;
     try {
       defaultResources = Resources.fromJson(context.getApplicationContext().getAssets().open("defaults.json"));
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (IOException ignored) {
     }
 
     ExternalResources.Builder builder = new ExternalResources.Builder(context, new LocalizedStringResourcesUrl("http://d1dcnpnaiymuxd.cloudfront.net/translation/android/"));
 
     builder.options(optionsBuilder.build());
     builder.listener(this);
+    builder.logLevel(Logger.LEVEL_VERBOSE);
 
     if (defaultResources != null) {
       builder.defaultResources(defaultResources);
@@ -72,11 +74,11 @@ public final class LocalizedStringResources implements OnExternalResourcesLoadLi
     listeners.remove(listener);
   }
 
-  public String getString(String key) throws Resources.NotFoundException {
+  public String getString(String key) throws NotFoundException {
     return resources.getString(key);
   }
 
-  public String getString(String key, Object... formatArgs) throws Resources.NotFoundException {
+  public String getString(String key, Object... formatArgs) throws NotFoundException {
     return resources.getString(key, formatArgs);
   }
 
