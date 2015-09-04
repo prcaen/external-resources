@@ -15,6 +15,7 @@ import com.google.gson.JsonSerializer;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Map;
@@ -46,19 +47,7 @@ public final class JsonConverter implements Converter {
 
   @Override
   public Resources fromString(String string) throws IOException {
-    JsonObject jsonObject = GSON.fromJson(string, JsonObject.class);
-
-    Resources resources = new Resources();
-
-    for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-      Resource resource = GSON.fromJson(entry.getValue(), Resource.class);
-
-      if (resource != null) {
-        resources.add(entry.getKey(), resource);
-      }
-    }
-
-    return resources;
+    return fromReader(new StringReader(string));
   }
 
   private static class ResourceJsonSerializer implements JsonSerializer<Resource> {
@@ -90,15 +79,9 @@ public final class JsonConverter implements Converter {
         resourcesArray = resources.toArray(resourcesArray);
 
         return new Resource(resources.toArray(resourcesArray));
-      } else if (json.isJsonArray() && depth > 0) {
-        throw new JsonParseException("The json object cannot have depth > 1 for array elements.");
-      } else if (json.isJsonNull()) {
+      } else {
         return null;
-      } else if (json.isJsonObject()) {
-        throw new JsonParseException("The json object cannot contains sub-objects.");
       }
-
-      throw new JsonParseException("An error occurred while deserialize Resource: " + json.getAsString());
     }
 
     private Resource get(JsonPrimitive primitive) {
