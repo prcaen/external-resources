@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -49,23 +50,27 @@ public final class Resources {
   }
 
   public Resources merge(Resources resources) {
-    for (Map.Entry<String, Resource> entry: resources.entrySet()) {
+    for (Map.Entry<String, Resource> entry : resources.entrySet()) {
       members.put(entry.getKey(), entry.getValue());
     }
 
     return this;
   }
 
-  public static Resources from(String string, Converter converter) throws IOException {
-    return converter.fromString(string);
+  public static Resources from(Reader reader, Converter converter) throws IOException {
+    return converter.fromReader(reader);
   }
 
-  public static Resources fromJson(String string) throws IOException {
-    return new JsonConverter().fromString(string);
+  public static Resources from(String string, Converter converter) throws IOException {
+    return from(new StringReader(string), converter);
   }
 
   public static Resources fromJson(Reader reader) throws IOException {
-    return new JsonConverter().fromReader(reader);
+    return from(reader, new JsonConverter());
+  }
+
+  public static Resources fromJson(String string) throws IOException {
+    return from(string, new JsonConverter());
   }
 
   public static Resources fromJson(InputStream reader) throws IOException {

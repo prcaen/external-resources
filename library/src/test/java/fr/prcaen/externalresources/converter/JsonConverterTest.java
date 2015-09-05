@@ -1,65 +1,66 @@
 package fr.prcaen.externalresources.converter;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 import fr.prcaen.externalresources.model.Resources;
 
-public class JsonConverterTest extends TestCase {
-  private final JsonConverter converter = new JsonConverter();
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+public class JsonConverterTest {
+  private final Resources resources;
+
+  public JsonConverterTest() throws IOException {
+    this.resources = new JsonConverter().fromReader(new InputStreamReader(getClass().getResourceAsStream("/test.json")));
+  }
+
+  @Test
   public void testString() throws Exception {
-    Resources resources = converter.fromString("{\"foo\":\"bar\"}");
-
-    assertTrue(resources.has("foo"));
-    assertTrue(resources.get("foo").isString());
-    assertEquals(resources.get("foo").getAsString(), "bar");
+    assertTrue("hello key exists", resources.has("hello"));
+    assertTrue("hello is string", resources.get("hello").isString());
+    assertEquals("hello value is Hello!", resources.get("hello").getAsString(), "Hello!");
   }
 
+  @Test
   public void testBoolean() throws Exception {
-    Resources resources = converter.fromString("{\"is_accepted\":true}");
+    assertTrue("screen_small key exists", resources.has("screen_small"));
+    assertTrue("adjust_view_bounds key exists", resources.has("adjust_view_bounds"));
 
-    assertTrue(resources.has("is_accepted"));
-    assertTrue(resources.get("is_accepted").isBoolean());
-    assertEquals(resources.get("is_accepted").getAsBoolean(), true);
+    assertTrue("screen_small is boolean", resources.get("screen_small").isBoolean());
+    assertTrue("adjust_view_bounds is boolean", resources.get("adjust_view_bounds").isBoolean());
+
+    assertEquals("screen_small is true", resources.get("screen_small").getAsBoolean(), true);
+    assertEquals("adjust_view_bounds is false", resources.get("adjust_view_bounds").getAsBoolean(), false);
   }
 
+  @Test
   public void testInteger() throws Exception {
-    Resources resources = converter.fromString("{\"a_int\":1}");
-
-    assertTrue(resources.has("a_int"));
-    assertTrue(resources.get("a_int").isNumber());
-    assertEquals(resources.get("a_int").getAsInt(), 1);
+    assertTrue("max_speed key exists", resources.has("max_speed"));
+    assertTrue("min_speed key exists", resources.has("min_speed"));
+    assertTrue("max_speed key is a number", resources.get("max_speed").isNumber());
+    assertTrue("min_speed key is a number", resources.get("min_speed").isNumber());
+    assertEquals("max_speed is equal to 75", resources.get("max_speed").getAsInt(), 75);
+    assertEquals("min_speed is equal to 5", resources.get("min_speed").getAsInt(), 5);
   }
 
-  public void testFloat() throws Exception {
-    Resources resources = converter.fromString("{\"a_float\":2.1,\"another_float\":2.0}");
-
-    assertTrue(resources.has("a_float"));
-    assertTrue(resources.get("a_float").isNumber());
-    assertEquals(resources.get("a_float").getAsFloat(), 2.1f);
-
-    assertTrue(resources.has("another_float"));
-    assertTrue(resources.get("another_float").isNumber());
-    assertEquals(resources.get("another_float").getAsFloat(), 2.0f);
-  }
-
+  @Test
   public void testStringArray() throws Exception {
-    Resources resources = converter.fromString("{\"an_array\":[\"a_string\",\"foobar\"]}");
-
-    assertTrue(resources.has("an_array"));
-    assertTrue(resources.get("an_array").isArray());
-    assertEquals(resources.get("an_array").getAsStringArray().length, 2);
-    assertEquals(resources.get("an_array").getAsStringArray()[0], "a_string");
-    assertEquals(resources.get("an_array").getAsStringArray()[1], "foobar");
+    assertTrue("planets_array key exists", resources.has("planets_array"));
+    assertTrue("planets_array is array", resources.get("planets_array").isArray());
+    assertEquals("planets_array array length is 4", resources.get("planets_array").getAsStringArray().length, 4);
+    assertEquals("planets_array[0] equals Mercury", resources.get("planets_array").getAsStringArray()[0], "Mercury");
+    assertEquals("planets_array[2] equals Earth", resources.get("planets_array").getAsStringArray()[2], "Earth");
   }
 
+  @Test
   public void testIntegerArray() throws Exception {
-    Resources resources = converter.fromString("{\"an_array\":[123,456]}");
-
-    assertTrue(resources.has("an_array"));
-    assertTrue(resources.get("an_array").isArray());
-    assertEquals(resources.get("an_array").getAsIntegerArray().length, 2);
-    assertEquals(resources.get("an_array").getAsIntegerArray()[0], 123);
-    assertEquals(resources.get("an_array").getAsIntegerArray()[1], 456);
+    assertTrue("bits key exists", resources.has("bits"));
+    assertTrue("bits is array", resources.get("bits").isArray());
+    assertEquals("bits array length is 4", resources.get("bits").getAsIntegerArray().length, 4);
+    assertEquals("bits[0] equals 4", resources.get("bits").getAsIntegerArray()[0], 4);
+    assertEquals("bits[3] equals 32", resources.get("bits").getAsIntegerArray()[3], 32);
   }
 }

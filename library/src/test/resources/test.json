@@ -1,0 +1,27 @@
+{
+  "hello": "Hello!",
+  "planets_array": [
+    "Mercury",
+    "Venus",
+    "Earth",
+    "Mars"
+  ],
+  "screen_small": true,
+  "adjust_view_bounds": false,
+  "opaque_red": "#f00",
+  "translucent_red": "#80ff0000",
+  "textview_height": "25dp",
+  "textview_width": "150px",
+  "ball_radius": "30pt",
+  "header_height": "35mm",
+  "flag_size": "20in",
+  "font_size": "16sp",
+  "max_speed": 75,
+  "min_speed": 5,
+  "bits": [
+    4,
+    8,
+    16,
+    32
+  ]
+}

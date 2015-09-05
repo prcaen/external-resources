@@ -45,7 +45,6 @@ public final class JsonConverter implements Converter {
     return resources;
   }
 
-  @Override
   public Resources fromString(String string) throws IOException {
     return fromReader(new StringReader(string));
   }
