@@ -10,8 +10,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -45,16 +43,9 @@ public final class JsonConverter implements Converter {
     return resources;
   }
 
+  @SuppressWarnings("unused")
   public Resources fromString(String string) throws IOException {
     return fromReader(new StringReader(string));
-  }
-
-  private static class ResourceJsonSerializer implements JsonSerializer<Resource> {
-
-    @Override
-    public JsonElement serialize(Resource src, Type typeOfSrc, JsonSerializationContext context) {
-      return null;
-    }
   }
 
   private static class ResourceJsonDeserializer implements JsonDeserializer<Resource> {

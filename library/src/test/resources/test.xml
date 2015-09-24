@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="hello">Hello!</string>
+
+  <string-array name="planets_array">
+    <item>Mercury</item>
+    <item>Venus</item>
+    <item>Earth</item>
+    <item>Mars</item>
+  </string-array>
+
+  <bool name="screen_small">true</bool>
+  <bool name="adjust_view_bounds">false</bool>
+
+  <color name="opaque_red">#f00</color>
+  <color name="translucent_red">#80ff0000</color>
+
+  <dimen name="textview_height">25dp</dimen>
+  <dimen name="textview_width">150px</dimen>
+  <dimen name="ball_radius">30pt</dimen>
+  <dimen name="header_height">35mm</dimen>
+  <dimen name="flag_size">20in</dimen>
+  <dimen name="font_size">16sp</dimen>
+
+  <integer name="max_speed">75</integer>
+  <integer name="min_speed">5</integer>
+
+  <integer-array name="bits">
+    <item>4</item>
+    <item>8</item>
+    <item>16</item>
+    <item>32</item>
+  </integer-array>
+</resources>
