@@ -63,7 +63,7 @@ public final class XmlConverter implements Converter {
   }
 
   @Nullable
-  private SimpleEntry<String, Resource> get(Node node) throws DOMException {
+  protected SimpleEntry<String, Resource> get(Node node) throws DOMException {
     final String key = node.getAttributes().getNamedItem(ATTRIBUTE_NAME).getNodeValue();
     final Resource value = getResource(node);
 
@@ -75,7 +75,7 @@ public final class XmlConverter implements Converter {
   }
 
   @Nullable
-  private Resource getResource(Node node) {
+  protected Resource getResource(Node node) {
     switch (node.getNodeName()) {
       case STRING_NODE_NAME:
       case COLOR_NODE_NAME:
@@ -95,7 +95,7 @@ public final class XmlConverter implements Converter {
   }
 
   @Nullable
-  private <T> Resource getResource(Class<T> clazz, Node node) {
+  protected <T> Resource getResource(Class<T> clazz, Node node) {
     if (clazz.equals(Integer.class)) {
       return new Resource(Integer.valueOf(node.getTextContent()));
     } else if (clazz.equals(String.class)) {
@@ -105,7 +105,7 @@ public final class XmlConverter implements Converter {
     }
   }
 
-  private <T> Resource getResource(Class<T> clazz, NodeList nodeList) {
+  protected <T> Resource getResource(Class<T> clazz, NodeList nodeList) {
     ArrayList<Resource> resources = new ArrayList<>();
 
     for (int i = 0; i < nodeList.getLength(); i++) {
@@ -121,7 +121,7 @@ public final class XmlConverter implements Converter {
     return new Resource(resources.toArray(new Resource[resources.size()]));
   }
 
-  private static Document read(Reader xml) throws ParserConfigurationException, IOException, SAXException {
+  protected static Document read(Reader xml) throws ParserConfigurationException, IOException, SAXException {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setIgnoringElementContentWhitespace(true);
     factory.setNamespaceAware(true);

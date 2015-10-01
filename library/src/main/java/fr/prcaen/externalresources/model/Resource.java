@@ -1,5 +1,8 @@
 package fr.prcaen.externalresources.model;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.google.gson.internal.LazilyParsedNumber;
 
 public final class Resource {
@@ -38,24 +41,53 @@ public final class Resource {
   }
 
   public boolean getAsBoolean() {
-    if (isBoolean()) {
+    if (isBoolean() && getAsNonPrimitiveBoolean() != null) {
       return getAsNonPrimitiveBoolean();
     } else {
       return Boolean.parseBoolean(getAsString());
     }
   }
 
-  public Number getAsNumber() {
-    return value instanceof String ? new LazilyParsedNumber((String) value) : (Number) value;
+  @Nullable
+  public String getAsString() {
+    if (isNumber() && getAsNumber() != null) {
+      return getAsNumber().toString();
+    } else if (isBoolean() && getAsNonPrimitiveBoolean() != null) {
+      return getAsNonPrimitiveBoolean().toString();
+    } else if (isString()) {
+      return (String) value;
+    } else {
+      return null;
+    }
   }
 
-  public String getAsString() {
-    if (isNumber()) {
-      return getAsNumber().toString();
-    } else if (isBoolean()) {
-      return getAsNonPrimitiveBoolean().toString();
+  @Nullable
+  public Float getAsFloat() {
+    if (isNumber() && getAsNumber() != null) {
+      return getAsNumber().floatValue();
+    } else if (getAsString() != null) {
+      try {
+        return Float.parseFloat(getAsString());
+      } catch (NumberFormatException e) {
+        return null;
+      }
     } else {
-      return (String) value;
+      return null;
+    }
+  }
+
+  @Nullable
+  public Integer getAsInt() {
+    if (isNumber() && getAsNumber() != null) {
+      return getAsNumber().intValue();
+    } else if (getAsString() != null) {
+      try {
+        return Integer.parseInt(getAsString());
+      } catch (NumberFormatException e) {
+        return null;
+      }
+    } else {
+      return null;
     }
   }
 
@@ -67,15 +99,18 @@ public final class Resource {
       for (int i = 0; i < resources.length; i++) {
         Resource resource = resources[i];
 
-        integers[i] = resource.getAsInt();
+        if (resource.getAsInt() != null) {
+          integers[i] = resource.getAsInt();
+        }
       }
 
       return integers;
     } else {
-      return new int[]{getAsInt()};
+      return new int[]{};
     }
   }
 
+  @NonNull
   public String[] getAsStringArray() {
     if (isArray()) {
       Resource[] resources = getAsArray();
@@ -88,24 +123,39 @@ public final class Resource {
       }
 
       return strings;
-    } else {
+    } else if (getAsString() != null) {
       return getAsString().split("(?!^)");
+    } else {
+      return new String[]{};
     }
   }
 
-  public float getAsFloat() {
-    return isNumber() ? getAsNumber().floatValue() : Float.parseFloat(getAsString());
+  @Nullable
+  protected Number getAsNumber() {
+    if (isString()) {
+      return new LazilyParsedNumber((String) value);
+    } else if (isNumber()) {
+      return (Number) value;
+    } else {
+      return null;
+    }
   }
 
-  public int getAsInt() {
-    return isNumber() ? getAsNumber().intValue() : Integer.parseInt(getAsString());
+  @NonNull
+  protected Resource[] getAsArray() {
+    try {
+      return (Resource[]) value;
+    } catch (ClassCastException e) {
+      return new Resource[]{};
+    }
   }
 
-  private Resource[] getAsArray() {
-    return (Resource[]) value;
-  }
-
-  private Boolean getAsNonPrimitiveBoolean() {
-    return (Boolean) value;
+  @Nullable
+  protected Boolean getAsNonPrimitiveBoolean() {
+    try {
+      return (Boolean) value;
+    } catch (ClassCastException e) {
+      return null;
+    }
   }
 }

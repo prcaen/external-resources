@@ -8,14 +8,16 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import fr.prcaen.externalresources.converter.Converter;
 import fr.prcaen.externalresources.converter.JsonConverter;
+import fr.prcaen.externalresources.converter.XmlConverter;
 
+@SuppressWarnings("unused")
 public final class Resources {
-  private final HashMap<String, Resource> members;
+  protected final HashMap<String, Resource> members;
 
   public Resources() {
     this.members = new HashMap<>();
@@ -29,11 +31,8 @@ public final class Resources {
     return members.put(key, value);
   }
 
-  public Resource remove(String key) {
-    return members.remove(key);
-  }
-
-  public Set<Map.Entry<String, Resource>> entrySet() {
+  @NonNull
+  protected Set<Entry<String, Resource>> entrySet() {
     return members.entrySet();
   }
 
@@ -45,12 +44,8 @@ public final class Resources {
     return members.get(key);
   }
 
-  public void putAll(Map<String, Resource> elements) {
-    members.putAll(elements);
-  }
-
   public Resources merge(Resources resources) {
-    for (Map.Entry<String, Resource> entry : resources.entrySet()) {
+    for (Entry<String, Resource> entry : resources.entrySet()) {
       members.put(entry.getKey(), entry.getValue());
     }
 
@@ -75,5 +70,17 @@ public final class Resources {
 
   public static Resources fromJson(InputStream reader) throws IOException {
     return fromJson(new InputStreamReader(reader));
+  }
+
+  public static Resources fromXml(Reader reader) throws IOException {
+    return from(reader, new XmlConverter());
+  }
+
+  public static Resources fromXml(String string) throws IOException {
+    return from(string, new XmlConverter());
+  }
+
+  public static Resources fromXml(InputStream reader) throws IOException {
+    return fromXml(new InputStreamReader(reader));
   }
 }

@@ -27,8 +27,13 @@ public final class JsonConverter implements Converter {
       .create();
 
   @Override
+  @Nullable
   public Resources fromReader(Reader reader) throws IOException {
     JsonObject jsonObject = GSON.fromJson(reader, JsonObject.class);
+
+    if(jsonObject == null) {
+      return null;
+    }
 
     Resources resources = new Resources();
 
@@ -48,7 +53,7 @@ public final class JsonConverter implements Converter {
     return fromReader(new StringReader(string));
   }
 
-  private static class ResourceJsonDeserializer implements JsonDeserializer<Resource> {
+  protected static class ResourceJsonDeserializer implements JsonDeserializer<Resource> {
     @Override
     public Resource deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
       return get(json, 0);
