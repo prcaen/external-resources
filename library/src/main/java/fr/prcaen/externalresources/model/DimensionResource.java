@@ -13,8 +13,8 @@ public final class DimensionResource {
   private static final String TYPE_MM = "mm";
   private static final String TYPE_PX = "px";
 
-  private final int type;
-  private final float value;
+  protected final int type;
+  protected final float value;
 
   public DimensionResource(int type, float value) {
     this.type = type;
@@ -29,29 +29,21 @@ public final class DimensionResource {
     return new DimensionResource(getTypeFromString(resource), getValueFromString(resource));
   }
 
-  private static float getValueFromString(@NonNull String str) {
+  protected static float getValueFromString(@NonNull String str) {
     String[] split = str.trim().split("[a-z-A-Z]");
 
-    if (split.length > 0) {
-      try {
-        return Float.valueOf(split[0]);
-      } catch (NumberFormatException ignored) {
-      }
-    } else {
-      try {
-        return Float.valueOf(str.trim());
-      } catch (NumberFormatException ignored) {
-      }
+    try {
+      return Float.valueOf(split[0]);
+    } catch (NumberFormatException | IndexOutOfBoundsException e) {
+      throw new IllegalArgumentException(str + " is not a valid dimension format.");
     }
-
-    throw new IllegalArgumentException(str + " is not a valid dimension format.");
   }
 
-  private static int getTypeFromString(@NonNull String str) {
+  protected static int getTypeFromString(@NonNull String str) {
     String[] split = str.trim().split("[0-9]");
 
     if (split.length > 0) {
-      final String typeStr = split[0];
+      final String typeStr = split[split.length - 1];
 
       switch (typeStr) {
         case TYPE_DP:
@@ -68,7 +60,7 @@ public final class DimensionResource {
         case TYPE_PX:
           return TypedValue.COMPLEX_UNIT_PX;
         default:
-          throw new IllegalArgumentException(str + " is not a valid dimension format.");
+          throw new IllegalArgumentException(typeStr + " is not a valid type dimension format.");
       }
     } else {
       return TypedValue.COMPLEX_UNIT_PX;
