@@ -2,9 +2,11 @@ package fr.prcaen.externalresources.model;
 
 import org.junit.Test;
 
+import java.io.StringReader;
 import java.util.HashMap;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 public final class ResourcesTest {
@@ -69,27 +71,32 @@ public final class ResourcesTest {
   }
 
   @Test
-  public void testFrom() throws Exception {
-
+  public void testFromJsonReader() throws Exception {
+    assertNotNull(Resources.fromJson(new StringReader("{\"foo\":\"bar\"}")));
   }
 
   @Test
-  public void testFrom1() throws Exception {
-
+  public void testFromJsonString() throws Exception {
+    assertNotNull(Resources.fromJson("{\"foo\":\"bar\"}"));
   }
 
   @Test
-  public void testFromJson() throws Exception {
-
+  public void testFromJsonInputStream() throws Exception {
+    assertNotNull(Resources.fromJson(getClass().getResourceAsStream("/test.json")));
   }
 
   @Test
-  public void testFromJson1() throws Exception {
-
+  public void testFromXmlReader() throws Exception {
+    assertNotNull(Resources.fromXml(new StringReader("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources><integer name=\"max_speed\">75</integer></resources>")));
   }
 
   @Test
-  public void testFromJson2() throws Exception {
+  public void testFromXmlString() throws Exception {
+    assertNotNull(Resources.fromXml("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources><integer name=\"max_speed\">75</integer></resources>"));
+  }
 
+  @Test
+  public void testFromXmlInputStream() throws Exception {
+    assertNotNull(Resources.fromXml(getClass().getResourceAsStream("/test.xml")));
   }
 }
