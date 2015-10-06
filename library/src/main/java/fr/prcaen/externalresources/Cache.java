@@ -10,8 +10,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public final class Cache {
-  private static final int MIN_DISK_CACHE_SIZE = 5 * 1024 * 1024;  // 5MB
-  private static final int MAX_DISK_CACHE_SIZE = 50 * 1024 * 1024; // 50MB
+  protected static final int MIN_DISK_CACHE_SIZE = 5 * 1024 * 1024;  // 5MB
+  protected static final int MAX_DISK_CACHE_SIZE = 50 * 1024 * 1024; // 50MB
 
   private static final String EXTERNAL_RESOURCES_FILE_NAME_CACHE = "external-resources-cache";
 
