@@ -23,27 +23,28 @@ public final class Downloader {
   private static final int WRITE_TIMEOUT_MILLIS = 20 * 1000;   // 20s
 
   @NonNull
-  private final OkHttpClient client = new OkHttpClient();
-
-  @NonNull
   private final Context context;
+  @NonNull
+  private final OkHttpClient client;
   @NonNull
   private final Converter converter;
   @NonNull
   private final Url url;
   @NonNull
   private final Options options;
-  @Cache.Policy
-  private final int policy;
 
-  public Downloader(@NonNull Context context, @NonNull Converter converter, @NonNull Url url, @NonNull Options options, @Cache.Policy int policy) {
-    this.context = context;
+  public Downloader(@NonNull Context context, @NonNull Converter converter, @NonNull Url url, @NonNull Options options) {
+    this(context, new OkHttpClient(), converter, url, options);
+  }
+
+  public Downloader(@NonNull Context context, @NonNull OkHttpClient client, @NonNull Converter converter, @NonNull Url url, @NonNull Options options) {
+    this.context = context.getApplicationContext();
+    this.client = client;
     this.url = url;
-    this.policy = policy;
     this.options = options;
     this.converter = converter;
 
-    Cache cache = new Cache(context);
+    Cache cache = new Cache(context.getApplicationContext());
 
     client.setConnectTimeout(CONNECT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
     client.setReadTimeout(READ_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
@@ -51,8 +52,8 @@ public final class Downloader {
     client.setCache(new com.squareup.okhttp.Cache(cache.getCacheDir(), cache.getCacheSize()));
   }
 
-  public Resources load() throws IOException {
-    prepareUrl();
+  public Resources load(@Cache.Policy int policy) throws IOException {
+    buildUrl();
 
     Logger.i(ExternalResources.TAG, "Load configuration from url: " + url.build());
 
@@ -89,7 +90,7 @@ public final class Downloader {
     return converter.fromReader(response.body().charStream());
   }
 
-  private void prepareUrl() {
+  protected void buildUrl() {
     Configuration configuration = context.getResources().getConfiguration();
 
     if (options.isUseFontScale()) {
@@ -167,14 +168,23 @@ public final class Downloader {
     }
   }
 
-  class ResponseException extends IOException {
-    final boolean localCacheOnly;
-    final int responseCode;
+  public static class ResponseException extends IOException {
+    private final boolean localCacheOnly;
+    private final int responseCode;
 
     public ResponseException(String message, @Cache.Policy int networkPolicy, int responseCode) {
       super(message);
+
       this.localCacheOnly = networkPolicy == Cache.POLICY_OFFLINE;
       this.responseCode = responseCode;
+    }
+
+    public boolean isLocalCacheOnly() {
+      return localCacheOnly;
+    }
+
+    public int getResponseCode() {
+      return responseCode;
     }
   }
 }

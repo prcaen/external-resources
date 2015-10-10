@@ -6,6 +6,7 @@ import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+@SuppressWarnings("unused")
 public final class Logger {
   @Retention(RetentionPolicy.SOURCE)
   @IntDef({
@@ -61,6 +62,11 @@ public final class Logger {
     if(level >= LEVEL_ERROR) {
       Log.e(tag, msg, tr);
     }
+  }
+
+  @Level
+  public static int getLevel() {
+    return level;
   }
 
   public static void setLevel(@Level int level) {

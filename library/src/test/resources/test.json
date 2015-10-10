@@ -1,5 +1,6 @@
 {
   "hello": "Hello!",
+  "string_with_args": "Hello %s!",
   "planets_array": [
     "Mercury",
     "Venus",
@@ -16,6 +17,7 @@
   "header_height": "35mm",
   "flag_size": "20in",
   "font_size": "16sp",
+  "wrong_dimension": "30ee",
   "max_speed": 75,
   "min_speed": 5,
   "bits": [

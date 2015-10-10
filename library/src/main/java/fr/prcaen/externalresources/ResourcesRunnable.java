@@ -9,10 +9,13 @@ import fr.prcaen.externalresources.model.Resources;
 public final class ResourcesRunnable implements Runnable {
   private final Downloader downloader;
   private final Listener listener;
+  @Cache.Policy
+  private final int cachePolicy;
 
-  public ResourcesRunnable(@NonNull Downloader downloader, @NonNull Listener listener) {
+  public ResourcesRunnable(@NonNull Downloader downloader, @Cache.Policy int policy, @NonNull Listener listener) {
     this.downloader = downloader;
     this.listener = listener;
+    this.cachePolicy = policy;
   }
 
   @Override
@@ -20,7 +23,7 @@ public final class ResourcesRunnable implements Runnable {
     setName();
 
     try {
-      Resources resources = downloader.load();
+      Resources resources = downloader.load(cachePolicy);
       listener.onResourcesLoadSuccess(resources);
     } catch (IOException e) {
       listener.onResourcesLoadFailed(e);

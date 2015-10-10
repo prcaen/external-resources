@@ -2,6 +2,7 @@ package fr.prcaen.externalresources;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
@@ -29,7 +30,7 @@ public class ExternalResources {
   private static final String THREAD_NAME = "ExternalResourcesThread";
   private static final String EXCEPTION_NOT_LOADED = "Resources are null.";
 
-  private static volatile ExternalResources singleton = null;
+  protected static volatile ExternalResources singleton = null;
 
   @NonNull
   private final DisplayMetrics metrics;
@@ -39,10 +40,12 @@ public class ExternalResources {
   private final Resources defaultResources;
   @NonNull
   private final Options options;
+  @Cache.Policy
+  private final int policy;
   @Nullable
   private final OnExternalResourcesLoadListener listener;
   @NonNull
-  private final ArrayList<OnExternalResourcesChangeListener> listeners = new ArrayList<>();
+  protected final ArrayList<OnExternalResourcesChangeListener> listeners = new ArrayList<>();
   @NonNull
   private Resources resources;
   @NonNull
@@ -53,7 +56,8 @@ public class ExternalResources {
 
     this.configuration = new Configuration(context.getResources().getConfiguration());
     this.metrics = context.getResources().getDisplayMetrics();
-    this.downloader = new Downloader(context, converter, url, options, policy);
+    this.downloader = new Downloader(context, converter, url, options);
+    this.policy = policy;
     this.defaultResources = defaultResources;
     this.resources = defaultResources;
     this.options = options;
@@ -90,11 +94,11 @@ public class ExternalResources {
   @ColorInt
   public int getColor(@NonNull String key) throws NotFoundException {
     Resource resource = resources.get(key);
-    if (resource != null) {
-      return resource.getAsInt();
+    if (resource != null && resource.getAsString() != null) {
+      return Color.parseColor(resource.getAsString());
     }
 
-    throw new NotFoundException("Integer resource with key: " + key);
+    throw new NotFoundException("Color resource with key: " + key);
   }
 
   public float getDimension(@NonNull String key) throws NotFoundException {
@@ -132,7 +136,7 @@ public class ExternalResources {
 
   public int getInteger(@NonNull String key) throws NotFoundException {
     Resource resource = resources.get(key);
-    if (resource != null) {
+    if (resource != null && resource.getAsInt() != null) {
       return resource.getAsInt();
     }
 
@@ -161,7 +165,7 @@ public class ExternalResources {
   private void launch() {
     Logger.v(TAG, "Launch");
     ExecutorService pool = Executors.newSingleThreadExecutor();
-    pool.submit(new ResourcesRunnable(downloader, new ResourcesRunnable.Listener() {
+    pool.submit(new ResourcesRunnable(downloader, policy, new ResourcesRunnable.Listener() {
       @Override
       public void onResourcesLoadSuccess(Resources resources) {
         Logger.i(TAG, "onResourcesLoadSuccess");
@@ -216,25 +220,43 @@ public class ExternalResources {
     }
   }
 
+  @SuppressWarnings("ConstantConditions")
   public static ExternalResources initialize(@NonNull Context context, Url url) {
-    if (singleton == null) {
-      synchronized (ExternalResources.class) {
-        if (singleton == null) {
-          singleton = new Builder(context, url).build();
-        }
+    if (context == null) {
+      throw new IllegalArgumentException("Context must not be null.");
+    }
+
+    if (url == null) {
+      throw new IllegalArgumentException("Path must not be null.");
+    }
+
+    synchronized (ExternalResources.class) {
+      if (singleton != null) {
+        throw new IllegalStateException("Singleton instance already exists.");
       }
+
+      singleton = new Builder(context, url).build();
     }
 
     return singleton;
   }
 
-  public static ExternalResources initialize(@NonNull Context context, String path) {
-    if (singleton == null) {
-      synchronized (ExternalResources.class) {
-        if (singleton == null) {
-          singleton = new Builder(context, path).build();
-        }
+  @SuppressWarnings("ConstantConditions")
+  public static ExternalResources initialize(@NonNull Context context, @NonNull String path) {
+    if (context == null) {
+      throw new IllegalArgumentException("Context must not be null.");
+    }
+
+    if (path == null) {
+      throw new IllegalArgumentException("Path must not be null.");
+    }
+
+    synchronized (ExternalResources.class) {
+      if (singleton != null) {
+        throw new IllegalStateException("Singleton instance already exists.");
       }
+
+      singleton = new Builder(context, path).build();
     }
 
     return singleton;
@@ -249,6 +271,7 @@ public class ExternalResources {
       if (singleton != null) {
         throw new IllegalStateException("Singleton instance already exists.");
       }
+
       singleton = externalResources;
     }
 
