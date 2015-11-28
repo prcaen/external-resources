@@ -7,6 +7,8 @@ import java.io.IOException;
 import fr.prcaen.externalresources.model.Resources;
 
 public final class ResourcesRunnable implements Runnable {
+  private static final String THREAD_NAME_SUFFIX = "-external-resources";
+
   private final Downloader downloader;
   private final Listener listener;
   @Cache.Policy
@@ -33,7 +35,7 @@ public final class ResourcesRunnable implements Runnable {
   private void setName() {
     long threadId = Thread.currentThread().getId();
 
-    Thread.currentThread().setName(threadId + "-external-resources");
+    Thread.currentThread().setName(threadId + THREAD_NAME_SUFFIX);
   }
 
   public interface Listener {
