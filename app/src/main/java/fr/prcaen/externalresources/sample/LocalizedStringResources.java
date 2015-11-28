@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import fr.prcaen.externalresources.ExternalResources;
 import fr.prcaen.externalresources.ExternalResources.NotFoundException;
@@ -12,7 +13,7 @@ import fr.prcaen.externalresources.Logger;
 import fr.prcaen.externalresources.Options;
 import fr.prcaen.externalresources.listener.OnExternalResourcesLoadListener;
 import fr.prcaen.externalresources.model.Resources;
-import fr.prcaen.externalresources.url.LocalizedUrl;
+import fr.prcaen.externalresources.url.Url;
 
 public final class LocalizedStringResources implements OnExternalResourcesLoadListener {
   private static volatile LocalizedStringResources singleton = null;
@@ -116,16 +117,104 @@ public final class LocalizedStringResources implements OnExternalResourcesLoadLi
     return singleton;
   }
 
-  private class LocalizedStringResourcesUrl extends LocalizedUrl {
+  private class LocalizedStringResourcesUrl implements Url {
+    private final String baseUrl;
+    private Locale locale;
+
     public LocalizedStringResourcesUrl(String baseUrl) {
-      super(baseUrl);
+      this.baseUrl = baseUrl;
+    }
+
+    @Override
+    public void fontScale(float fontScale) {
+
+    }
+
+    @Override
+    public void hardKeyboardHidden(int hardKeyboardHidden) {
+
+    }
+
+    @Override
+    public void keyboard(int keyboard) {
+
+    }
+
+    @Override
+    public void keyboardHidden(int keyboardHidden) {
+
+    }
+
+    @Override
+    public void locale(Locale locale) {
+      this.locale = locale;
+    }
+
+    @Override
+    public void mcc(int mcc) {
+
+    }
+
+    @Override
+    public void mnc(int mnc) {
+
+    }
+
+    @Override
+    public void navigation(int navigation) {
+
+    }
+
+    @Override
+    public void navigationHidden(int navigationHidden) {
+
+    }
+
+    @Override
+    public void orientation(int orientation) {
+
+    }
+
+    @Override
+    public void screenLayout(int screenLayout) {
+
+    }
+
+    @Override
+    public void touchscreen(int touchscreen) {
+
+    }
+
+    @Override
+    public void uiMode(int uiMode) {
+
+    }
+
+    @Override
+    public void densityDpi(int densityDpi) {
+
+    }
+
+    @Override
+    public void screenWidthDp(int screenWidthDp) {
+
+    }
+
+    @Override
+    public void screenHeightDp(int screenHeightDp) {
+
+    }
+
+    @Override
+    public void smallestScreenWidthDp(int smallestScreenWidthDp) {
+
     }
 
     @Override
     public String build() {
       final String localeStr = locale.getLanguage();
 
-      return baseURL + "strings-" + localeStr + ".json";
+      return baseUrl + "strings-" + localeStr + ".json";
     }
   }
 
