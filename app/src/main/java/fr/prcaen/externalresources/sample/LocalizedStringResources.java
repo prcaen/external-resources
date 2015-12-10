@@ -50,7 +50,7 @@ public final class LocalizedStringResources implements OnExternalResourcesLoadLi
     } catch (IOException ignored) {
     }
 
-    ExternalResources.Builder builder = new ExternalResources.Builder(context, new LocalizedStringResourcesUrl("http://d1dcnpnaiymuxd.cloudfront.net/translation/android/"));
+    ExternalResources.Builder builder = new ExternalResources.Builder(context, new LocalizedStringResourcesUrl("https://external-res.s3-eu-west-1.amazonaws.com/"));
 
     builder.options(optionsBuilder.build());
     builder.listener(this);

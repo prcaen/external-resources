@@ -1,0 +1,14 @@
+{
+  "error_bad_request": "An error occurred.",
+  "error_unauthorized": "You are not authorized to access this resource.",
+  "error_not_found": "You try to access a resource that has not been found.",
+  "error_request_timeout": "Waiting time for a response from the server expired.",
+  "error_request_cancelled": "The request was canceled.",
+  "error_no_network": "No network connection detected.",
+  "error_network_error": "An error has occurred while retrieving data from network.",
+  "error_connection": "An error has occurred while connecting to server.",
+  "error_internal_server_error": "An error occurred on our server. We are working on it.",
+  "error_not_implemented": "An error occurred on our server. We are working on it.",
+  "error_bad_gateway": "An error occurred on our server. We are working on it.",
+  "error_service_unavailable": "The server is currently unavailable. It is overloaded or down for maintenance. Please retry in a few minutes."
+}

@@ -4,14 +4,15 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import fr.prcaen.externalresources.converter.Converter;
 import fr.prcaen.externalresources.converter.JsonConverter;
@@ -27,21 +28,18 @@ import fr.prcaen.externalresources.url.Url;
 public class ExternalResources {
   public static final String TAG = "ExternalResources";
 
-  private static final String THREAD_NAME = "ExternalResourcesThread";
-  private static final String EXCEPTION_NOT_LOADED = "Resources are null.";
-
   protected static volatile ExternalResources singleton = null;
 
   @NonNull
-  private final DisplayMetrics metrics;
+  private final Context context;
   @NonNull
-  private final Downloader downloader;
+  private final DisplayMetrics metrics;
   @NonNull
   private final Resources defaultResources;
   @NonNull
+  private final Dispatcher dispatcher;
+  @NonNull
   private final Options options;
-  @Cache.Policy
-  private final int policy;
   @Nullable
   private final OnExternalResourcesLoadListener listener;
   @NonNull
@@ -51,13 +49,13 @@ public class ExternalResources {
   @NonNull
   private Configuration configuration;
 
-  private ExternalResources(@NonNull Context context, @NonNull Converter converter, @NonNull Url url, @NonNull Options options, @Cache.Policy int policy, @Logger.Level int logLevel, @NonNull Resources defaultResources, @Nullable OnExternalResourcesLoadListener listener) {
+  private ExternalResources(@NonNull Context context, @NonNull Converter converter, @NonNull Url url, @NonNull Options options, @Cache.Policy int cachePolicy, @Logger.Level int logLevel, @NonNull Resources defaultResources, @Nullable OnExternalResourcesLoadListener listener) {
     Logger.setLevel(logLevel);
 
+    this.context = context;
+    this.dispatcher = new Dispatcher(context, new Downloader(context, converter, url, options), new ExternalResourcesHandler(this), cachePolicy);
     this.configuration = new Configuration(context.getResources().getConfiguration());
     this.metrics = context.getResources().getDisplayMetrics();
-    this.downloader = new Downloader(context, converter, url, options);
-    this.policy = policy;
     this.defaultResources = defaultResources;
     this.resources = defaultResources;
     this.options = options;
@@ -162,28 +160,29 @@ public class ExternalResources {
     listeners.remove(listener);
   }
 
+  public void shutdown() {
+    dispatcher.stop();
+  }
+
+  public void onResourcesLoadSuccess(Resources resources) {
+    Logger.i(TAG, "onResourcesLoadSuccess");
+    this.resources = defaultResources.merge(resources);
+
+    triggerChange();
+  }
+
+  public void onResourcesLoadFailed(Exception exception) {
+    Logger.e(TAG, "onResourcesLoadFailed", exception);
+
+    if (listener != null) {
+      listener.onExternalResourcesLoadFailed(exception);
+    }
+  }
+
   private void launch() {
     Logger.v(TAG, "Launch");
-    ExecutorService pool = Executors.newSingleThreadExecutor();
-    pool.submit(new ResourcesRunnable(downloader, policy, new ResourcesRunnable.Listener() {
-      @Override
-      public void onResourcesLoadSuccess(Resources resources) {
-        Logger.i(TAG, "onResourcesLoadSuccess");
-        ExternalResources.this.resources = defaultResources.merge(resources);
 
-        triggerChange();
-      }
-
-      @Override
-      public void onResourcesLoadFailed(Exception exception) {
-        Logger.e(TAG, "onResourcesLoadFailed", exception);
-
-        if (listener != null) {
-          listener.onExternalResourcesLoadFailed(exception);
-        }
-      }
-    }));
-    pool.shutdown();
+    dispatcher.dispatchLaunch();
   }
 
   @SuppressWarnings("ConstantConditions")
@@ -404,6 +403,36 @@ public class ExternalResources {
 
       return new ExternalResources(context, converter, url, options, cachePolicy, logLevel, defaultResources, listener);
     }
+  }
+
+  private static class ExternalResourcesHandler extends Handler {
+
+    private final ExternalResources externalResources;
+
+    public ExternalResourcesHandler(ExternalResources externalResources) {
+      super(Looper.getMainLooper());
+
+      this.externalResources = externalResources;
+    }
+
+    @Override
+    public void handleMessage(Message message) {
+      super.handleMessage(message);
+
+      switch (message.what) {
+        case Dispatcher.REQUEST_DONE:
+          externalResources.onResourcesLoadSuccess((Resources) message.obj);
+          break;
+        case Dispatcher.REQUEST_FAILED:
+          externalResources.onResourcesLoadFailed((Exception) message.obj);
+          break;
+        default:
+          Logger.e(ExternalResources.TAG, "Unknown message: " + message.what);
+          break;
+      }
+
+    }
+
   }
 
   public static class NotFoundException extends RuntimeException {

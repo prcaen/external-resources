@@ -168,7 +168,7 @@ public final class Downloader {
     }
   }
 
-  public static class ResponseException extends IOException {
+  public static final class ResponseException extends IOException {
     private final boolean localCacheOnly;
     private final int responseCode;
 
