@@ -2,13 +2,13 @@ package fr.prcaen.externalresources;
 
 import android.support.annotation.NonNull;
 
-import java.io.IOException;
-
+import fr.prcaen.externalresources.exception.ExternalResourceException;
+import fr.prcaen.externalresources.exception.ResponseException;
 import fr.prcaen.externalresources.model.Resources;
 
 public final class ResourcesRunnable implements Runnable {
 
-  private static final int RETRY_COUNT = 2;
+  public static final int RETRY_COUNT = 2;
   private static final String THREAD_NAME_SUFFIX = "-external-resources";
 
   private final Downloader downloader;
@@ -33,27 +33,23 @@ public final class ResourcesRunnable implements Runnable {
       if (resources != null) {
         dispatcher.dispatchDone(resources);
       } else {
-        dispatcher.dispatchFailed(new NullPointerException("Resources are null."));
+        dispatcher.dispatchFailed(new ExternalResourceException("Resources are null."));
       }
-    } catch (Downloader.ResponseException e) {
+    } catch (ResponseException e) {
       dispatcher.dispatchFailed(e);
-    } catch (IOException e) {
-      if (shouldRetry()) {
-        dispatcher.dispatchRetry(this);
-      } else {
-        dispatcher.dispatchFailed(e);
-      }
+    } catch (ExternalResourceException e) {
+      dispatcher.dispatchRetry();
     } catch (Exception e) {
-      dispatcher.dispatchFailed(e);
+      dispatcher.dispatchFailed(new ExternalResourceException(e));
     }
   }
 
-  private boolean shouldRetry() {
-    boolean shouldRetry = retryCount > 0;
-
+  public void decreaseRetryCount() {
     retryCount--;
+  }
 
-    return shouldRetry;
+  public boolean canRetry() {
+    return retryCount > 0;
   }
 
 }

@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import fr.prcaen.externalresources.converter.Converter;
+import fr.prcaen.externalresources.exception.ExternalResourceException;
+import fr.prcaen.externalresources.exception.ResponseException;
 import fr.prcaen.externalresources.model.Resources;
 import fr.prcaen.externalresources.url.Url;
 
@@ -52,7 +54,7 @@ public final class Downloader {
     client.setCache(new com.squareup.okhttp.Cache(cache.getCacheDir(), cache.getCacheSize()));
   }
 
-  public Resources load(@Cache.Policy int policy) throws IOException {
+  public Resources load(@Cache.Policy int policy) throws ExternalResourceException {
     buildUrl();
 
     Logger.i(ExternalResources.TAG, "Load configuration from url: " + url.build());
@@ -78,16 +80,20 @@ public final class Downloader {
         .cacheControl(cacheControl)
         .build();
 
-    Response response = client.newCall(request).execute();
-    int responseCode = response.code();
+    try {
+      Response response = client.newCall(request).execute();
+      int responseCode = response.code();
 
-    Logger.d(ExternalResources.TAG, "Response code: " + responseCode);
-    if (responseCode >= 300) {
-      response.body().close();
-      throw new ResponseException(responseCode + " " + response.message(), policy, responseCode);
+      Logger.d(ExternalResources.TAG, "Response code: " + responseCode);
+      if (responseCode >= 300) {
+        response.body().close();
+        throw new ResponseException(responseCode + " " + response.message(), policy, responseCode);
+      }
+
+      return converter.fromReader(response.body().charStream());
+    } catch (IOException e) {
+      throw new ExternalResourceException(e);
     }
-
-    return converter.fromReader(response.body().charStream());
   }
 
   protected void buildUrl() {
@@ -168,23 +174,4 @@ public final class Downloader {
     }
   }
 
-  public static final class ResponseException extends IOException {
-    private final boolean localCacheOnly;
-    private final int responseCode;
-
-    public ResponseException(String message, @Cache.Policy int networkPolicy, int responseCode) {
-      super(message);
-
-      this.localCacheOnly = networkPolicy == Cache.POLICY_OFFLINE;
-      this.responseCode = responseCode;
-    }
-
-    public boolean isLocalCacheOnly() {
-      return localCacheOnly;
-    }
-
-    public int getResponseCode() {
-      return responseCode;
-    }
-  }
 }

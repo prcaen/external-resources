@@ -8,9 +8,10 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import fr.prcaen.externalresources.ExternalResources;
-import fr.prcaen.externalresources.ExternalResources.NotFoundException;
 import fr.prcaen.externalresources.Logger;
 import fr.prcaen.externalresources.Options;
+import fr.prcaen.externalresources.exception.ExternalResourceException;
+import fr.prcaen.externalresources.exception.NotFoundException;
 import fr.prcaen.externalresources.listener.OnExternalResourcesLoadListener;
 import fr.prcaen.externalresources.model.Resources;
 import fr.prcaen.externalresources.url.Url;
@@ -84,7 +85,7 @@ public final class LocalizedStringResources implements OnExternalResourcesLoadLi
   }
 
   @Override
-  public void onExternalResourcesLoadFailed(Exception exception) {
+  public void onExternalResourcesLoadFailed(ExternalResourceException exception) {
 
   }
 

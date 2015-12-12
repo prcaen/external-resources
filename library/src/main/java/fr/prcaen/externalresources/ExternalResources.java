@@ -16,6 +16,8 @@ import java.util.ArrayList;
 
 import fr.prcaen.externalresources.converter.Converter;
 import fr.prcaen.externalresources.converter.JsonConverter;
+import fr.prcaen.externalresources.exception.ExternalResourceException;
+import fr.prcaen.externalresources.exception.NotFoundException;
 import fr.prcaen.externalresources.listener.OnExternalResourcesChangeListener;
 import fr.prcaen.externalresources.listener.OnExternalResourcesLoadListener;
 import fr.prcaen.externalresources.model.DimensionResource;
@@ -30,8 +32,6 @@ public class ExternalResources {
 
   protected static volatile ExternalResources singleton = null;
 
-  @NonNull
-  private final Context context;
   @NonNull
   private final DisplayMetrics metrics;
   @NonNull
@@ -52,7 +52,6 @@ public class ExternalResources {
   private ExternalResources(@NonNull Context context, @NonNull Converter converter, @NonNull Url url, @NonNull Options options, @Cache.Policy int cachePolicy, @Logger.Level int logLevel, @NonNull Resources defaultResources, @Nullable OnExternalResourcesLoadListener listener) {
     Logger.setLevel(logLevel);
 
-    this.context = context;
     this.dispatcher = new Dispatcher(context, new Downloader(context, converter, url, options), new ExternalResourcesHandler(this), cachePolicy);
     this.configuration = new Configuration(context.getResources().getConfiguration());
     this.metrics = context.getResources().getDisplayMetrics();
@@ -171,7 +170,7 @@ public class ExternalResources {
     triggerChange();
   }
 
-  public void onResourcesLoadFailed(Exception exception) {
+  public void onResourcesLoadFailed(ExternalResourceException exception) {
     Logger.e(TAG, "onResourcesLoadFailed", exception);
 
     if (listener != null) {
@@ -424,7 +423,7 @@ public class ExternalResources {
           externalResources.onResourcesLoadSuccess((Resources) message.obj);
           break;
         case Dispatcher.REQUEST_FAILED:
-          externalResources.onResourcesLoadFailed((Exception) message.obj);
+          externalResources.onResourcesLoadFailed((ExternalResourceException) message.obj);
           break;
         default:
           Logger.e(ExternalResources.TAG, "Unknown message: " + message.what);
@@ -435,12 +434,4 @@ public class ExternalResources {
 
   }
 
-  public static class NotFoundException extends RuntimeException {
-    public NotFoundException() {
-    }
-
-    public NotFoundException(String name) {
-      super(name);
-    }
-  }
 }
