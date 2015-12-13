@@ -19,6 +19,8 @@ import org.robolectric.annotation.Config;
 
 import fr.prcaen.externalresources.converter.Converter;
 import fr.prcaen.externalresources.converter.JsonConverter;
+import fr.prcaen.externalresources.exception.ExternalResourceException;
+import fr.prcaen.externalresources.exception.ResponseException;
 import fr.prcaen.externalresources.url.DefaultUrl;
 
 import static junit.framework.Assert.assertEquals;
@@ -61,7 +63,7 @@ public final class DownloaderTest {
   public void testLoad() throws Exception {
     server.start();
 
-    DefaultUrl url = new DefaultUrl(server.getUrl("/success").toString());
+    DefaultUrl url = new DefaultUrl(server.url("/success").toString());
     Downloader downloader = new Downloader(context, converter, url, options);
 
     assertNotNull("From network", downloader.load(Cache.POLICY_ALL));
@@ -71,11 +73,11 @@ public final class DownloaderTest {
     assertNotNull("From cache", downloader.load(Cache.POLICY_OFFLINE));
   }
 
-  @Test(expected = Downloader.ResponseException.class)
+  @Test(expected = ExternalResourceException.class)
   public void testLoadWithException() throws Exception {
     server.start();
 
-    DefaultUrl url = new DefaultUrl(server.getUrl("/error").toString());
+    DefaultUrl url = new DefaultUrl(server.url("/error").toString());
     Downloader downloader = new Downloader(context, converter, url, options);
 
     downloader.load(Cache.POLICY_NONE);
@@ -106,7 +108,7 @@ public final class DownloaderTest {
   @SuppressWarnings("ThrowableInstanceNeverThrown")
   @Test
   public void testResponseException() {
-    Downloader.ResponseException exception = new Downloader.ResponseException("test", Cache.POLICY_NONE, 404);
+    ResponseException exception = new ResponseException("test", Cache.POLICY_NONE, 404);
 
     assertEquals("Exception message", exception.getMessage(), "test");
     assertFalse("LocalCacheOnly", exception.isLocalCacheOnly());

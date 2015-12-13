@@ -14,6 +14,8 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import fr.prcaen.externalresources.converter.JsonConverter;
+import fr.prcaen.externalresources.exception.ExternalResourceException;
+import fr.prcaen.externalresources.exception.NotFoundException;
 import fr.prcaen.externalresources.listener.OnExternalResourcesLoadListener;
 import fr.prcaen.externalresources.model.Resources;
 import fr.prcaen.externalresources.url.DefaultUrl;
@@ -68,7 +70,7 @@ public class ExternalResourcesTest {
     assertTrue(externalResources.getBoolean("screen_small"));
   }
 
-  @Test(expected = ExternalResources.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetBooleanNotFound() throws Exception {
     externalResources.getBoolean("unknown");
   }
@@ -78,7 +80,7 @@ public class ExternalResourcesTest {
     assertEquals(externalResources.getColor("translucent_red"), Color.parseColor("#80ff0000"));
   }
 
-  @Test(expected = ExternalResources.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetColorNotFound() throws Exception {
     externalResources.getColor("unknown");
   }
@@ -88,12 +90,12 @@ public class ExternalResourcesTest {
     assertEquals(externalResources.getDimension("textview_height"), 25f);
   }
 
-  @Test(expected = ExternalResources.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetDimensionNotFound() throws Exception {
     externalResources.getDimension("unknown");
   }
 
-  @Test(expected = ExternalResources.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testWrongDimension() throws Exception {
     externalResources.getDimension("wrong_dimension");
   }
@@ -103,7 +105,7 @@ public class ExternalResourcesTest {
     assertEquals(externalResources.getString("hello"), "Hello!");
   }
 
-  @Test(expected = ExternalResources.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetStringNotFound() throws Exception {
     externalResources.getString("unknown");
   }
@@ -113,7 +115,7 @@ public class ExternalResourcesTest {
     assertEquals(externalResources.getString("string_with_args", "Peter"), "Hello Peter!");
   }
 
-  @Test(expected = ExternalResources.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetStringWithArgumentsNotFound() throws Exception {
     externalResources.getString("unknown", "bar");
   }
@@ -123,7 +125,7 @@ public class ExternalResourcesTest {
     assertEquals(externalResources.getStringArray("planets_array").length, 4);
   }
 
-  @Test(expected = ExternalResources.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetStringArrayNotFound() throws Exception {
     externalResources.getStringArray("unknown");
   }
@@ -133,7 +135,7 @@ public class ExternalResourcesTest {
     assertEquals(externalResources.getInteger("max_speed"), 75);
   }
 
-  @Test(expected = ExternalResources.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetIntegerNotFound() throws Exception {
     externalResources.getInteger("unknown");
   }
@@ -143,7 +145,7 @@ public class ExternalResourcesTest {
     assertEquals(externalResources.getIntArray("bits").length, 4);
   }
 
-  @Test(expected = ExternalResources.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetIntArrayNotFound() throws Exception {
     externalResources.getIntArray("unknown");
   }
@@ -154,7 +156,7 @@ public class ExternalResourcesTest {
 
     externalResources.register(new OnExternalResourcesLoadListener() {
       @Override
-      public void onExternalResourcesLoadFailed(Exception exception) {
+      public void onExternalResourcesLoadFailed(ExternalResourceException e) {
 
       }
 
@@ -171,7 +173,7 @@ public class ExternalResourcesTest {
   public void testUnRegister() throws Exception {
     OnExternalResourcesLoadListener listener = new OnExternalResourcesLoadListener() {
       @Override
-      public void onExternalResourcesLoadFailed(Exception exception) {
+      public void onExternalResourcesLoadFailed(ExternalResourceException exception) {
 
       }
 
@@ -310,7 +312,7 @@ public class ExternalResourcesTest {
   public void testBuilderListener() throws Exception {
     assertNotNull(new ExternalResources.Builder(context, new DefaultUrl("/")).listener(new OnExternalResourcesLoadListener() {
       @Override
-      public void onExternalResourcesLoadFailed(Exception exception) {
+      public void onExternalResourcesLoadFailed(ExternalResourceException exception) {
       }
 
       @Override
@@ -328,7 +330,7 @@ public class ExternalResourcesTest {
   public void testBuilderListenerAlreadyDefined() throws Exception {
     ExternalResources.Builder builder = new ExternalResources.Builder(context, new DefaultUrl("/")).listener(new OnExternalResourcesLoadListener() {
       @Override
-      public void onExternalResourcesLoadFailed(Exception exception) {
+      public void onExternalResourcesLoadFailed(ExternalResourceException exception) {
       }
 
       @Override
@@ -337,7 +339,7 @@ public class ExternalResourcesTest {
     });
     builder.listener(new OnExternalResourcesLoadListener() {
       @Override
-      public void onExternalResourcesLoadFailed(Exception exception) {
+      public void onExternalResourcesLoadFailed(ExternalResourceException exception) {
       }
 
       @Override
