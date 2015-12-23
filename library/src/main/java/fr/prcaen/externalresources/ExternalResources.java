@@ -261,6 +261,48 @@ public class ExternalResources {
   }
 
   @SuppressWarnings("ConstantConditions")
+  public static ExternalResources initialize(@NonNull Context context, Url url, Resources resources) {
+    if (context == null) {
+      throw new IllegalArgumentException("Context must not be null.");
+    }
+
+    if (url == null) {
+      throw new IllegalArgumentException("Path must not be null.");
+    }
+
+    synchronized (ExternalResources.class) {
+      if (singleton != null) {
+        throw new IllegalStateException("Singleton instance already exists.");
+      }
+
+      singleton = new Builder(context, url).build();
+    }
+
+    return singleton;
+  }
+
+  @SuppressWarnings("ConstantConditions")
+  public static ExternalResources initialize(@NonNull Context context, @NonNull String path, Resources defaultResources) {
+    if (context == null) {
+      throw new IllegalArgumentException("Context must not be null.");
+    }
+
+    if (path == null) {
+      throw new IllegalArgumentException("Path must not be null.");
+    }
+
+    synchronized (ExternalResources.class) {
+      if (singleton != null) {
+        throw new IllegalStateException("Singleton instance already exists.");
+      }
+
+      singleton = new Builder(context, path).defaultResources(defaultResources).build();
+    }
+
+    return singleton;
+  }
+
+  @SuppressWarnings("ConstantConditions")
   public static ExternalResources initialize(@NonNull ExternalResources externalResources) {
     if (externalResources == null) {
       throw new IllegalArgumentException("ExternalResources must not be null.");
