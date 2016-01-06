@@ -17,6 +17,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.util.Locale;
+
 import fr.prcaen.externalresources.converter.Converter;
 import fr.prcaen.externalresources.converter.JsonConverter;
 import fr.prcaen.externalresources.exception.ExternalResourceException;
@@ -42,6 +44,7 @@ public final class DownloaderTest {
 
   @Before
   public void setUp() throws Exception {
+    Locale.setDefault(new Locale("en", "US"));
     initMocks(this);
     when(context.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
 
@@ -92,7 +95,7 @@ public final class DownloaderTest {
     Downloader downloader = new Downloader(context, converter, url, options);
 
     downloader.buildUrl();
-    assertEquals("Url is complete", url.build(), "http://test.com?orientation=0&keyboard=0&touch_screen=0&font_scale=1.0&mcc=0&navigation_hidden=0&locale=fr_FR&smallest_screen_width_dp=0&screen_width_dp=0&keyboard_hidden=0&navigation=0&screen_layout=18&screen_height_dp=0&mnc=0&ui_mode=0&hard_keyboard_hidden=0");
+    assertEquals("Url is complete", "http://test.com?orientation=0&keyboard=0&touch_screen=0&font_scale=1.0&mcc=0&navigation_hidden=0&locale=en_US&smallest_screen_width_dp=0&screen_width_dp=0&keyboard_hidden=0&navigation=0&screen_layout=18&screen_height_dp=0&mnc=0&ui_mode=0&hard_keyboard_hidden=0",  url.build());
   }
 
   @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
@@ -102,7 +105,7 @@ public final class DownloaderTest {
     Downloader downloader = new Downloader(context, converter, url, options);
 
     downloader.buildUrl();
-    assertEquals("Url is complete", url.build(), "http://test.com?orientation=0&keyboard=0&touch_screen=0&font_scale=1.0&mcc=0&navigation_hidden=0&locale=fr_FR&smallest_screen_width_dp=0&screen_width_dp=0&keyboard_hidden=0&navigation=0&screen_layout=82&screen_height_dp=0&mnc=0&ui_mode=0&hard_keyboard_hidden=0&density_dpi=160");
+    assertEquals("Url is complete", "http://test.com?orientation=0&keyboard=0&touch_screen=0&font_scale=1.0&mcc=0&navigation_hidden=0&locale=en_US&smallest_screen_width_dp=0&screen_width_dp=0&keyboard_hidden=0&navigation=0&screen_layout=82&screen_height_dp=0&mnc=0&ui_mode=0&hard_keyboard_hidden=0&density_dpi=160", url.build());
   }
 
   @SuppressWarnings("ThrowableInstanceNeverThrown")
