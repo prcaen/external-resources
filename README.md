@@ -78,15 +78,15 @@ ExternalResources is a Android library which allows you to use resources over th
 #### Default resources
 In your application class add the following lines in `onCreate`:
 
-    ```java
-    @Override
-    public void onCreate() {
-        super.onCreate();
+```java
+@Override
+public void onCreate() {
+    super.onCreate();
 
-        Resources defaults = Resources.fromJson(getAssets().open("defaults.json"))
-        ExternalResources.initialize(this, "http://your-url.com/path.json", defaults);
-    }
-    ```
+    Resources defaults = Resources.fromJson(getAssets().open("defaults.json"))
+    ExternalResources.initialize(this, "http://your-url.com/path.json", defaults);
+}
+```
      
 Sample app
 ----------
