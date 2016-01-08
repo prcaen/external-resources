@@ -1,6 +1,6 @@
 # External Resources
 
-![Build status](https://api.travis-ci.org/prcaen/external-resources.svg?branch=develop)
+[![Build status](https://api.travis-ci.org/prcaen/external-resources.svg?branch=develop)](https://travis-ci.org/prcaen/external-resources)
 
 ExternalResources is a Android library which allows you to use resources over the air.
 
@@ -9,6 +9,7 @@ ExternalResources is a Android library which allows you to use resources over th
 * Each time the configuration changes, the given URL is call with query parameters
 * Configurable and easy to use.
 * Callback triggered when configuration change.
+* **Tested**: > 100 tests.
 
 ## Usage
 ### Basic
