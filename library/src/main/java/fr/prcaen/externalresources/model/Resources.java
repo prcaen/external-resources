@@ -7,9 +7,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import fr.prcaen.externalresources.converter.Converter;
 import fr.prcaen.externalresources.converter.JsonConverter;
@@ -17,13 +17,13 @@ import fr.prcaen.externalresources.converter.XmlConverter;
 
 @SuppressWarnings("unused")
 public final class Resources {
-  protected final HashMap<String, Resource> members;
+  protected final ConcurrentHashMap<String, Resource> members;
 
   public Resources() {
-    this.members = new HashMap<>();
+    this.members = new ConcurrentHashMap<>();
   }
 
-  public Resources(@NonNull HashMap<String, Resource> members) {
+  public Resources(@NonNull ConcurrentHashMap<String, Resource> members) {
     this.members = members;
   }
 

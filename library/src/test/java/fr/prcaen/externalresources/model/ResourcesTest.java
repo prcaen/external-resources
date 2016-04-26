@@ -3,14 +3,14 @@ package fr.prcaen.externalresources.model;
 import org.junit.Test;
 
 import java.io.StringReader;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 public final class ResourcesTest {
-  private static final HashMap<String, Resource> EMPTY_HASH_MAP = new HashMap<>();
+  private static final ConcurrentHashMap<String, Resource> EMPTY_HASH_MAP = new ConcurrentHashMap<>();
 
   @Test
   public void testAdd() throws Exception {
@@ -22,7 +22,7 @@ public final class ResourcesTest {
 
   @Test
   public void testEntrySet() throws Exception {
-    HashMap<String, Resource> map = EMPTY_HASH_MAP;
+    ConcurrentHashMap<String, Resource> map = EMPTY_HASH_MAP;
     map.put("foo", new Resource("bar"));
 
     Resources resources = new Resources(map);
@@ -32,7 +32,7 @@ public final class ResourcesTest {
 
   @Test
   public void testHas() throws Exception {
-    HashMap<String, Resource> map = EMPTY_HASH_MAP;
+    ConcurrentHashMap<String, Resource> map = EMPTY_HASH_MAP;
     map.put("foo", new Resource("bar"));
 
     Resources resources = new Resources(map);
@@ -42,7 +42,7 @@ public final class ResourcesTest {
 
   @Test
   public void testGet() throws Exception {
-    HashMap<String, Resource> map = EMPTY_HASH_MAP;
+    ConcurrentHashMap<String, Resource> map = EMPTY_HASH_MAP;
     map.put("foo", new Resource("bar"));
 
     Resources resources = new Resources(map);
