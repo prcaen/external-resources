@@ -45,9 +45,7 @@ public final class Resources {
   }
 
   public Resources merge(Resources resources) {
-    for (Entry<String, Resource> entry : resources.entrySet()) {
-      members.put(entry.getKey(), entry.getValue());
-    }
+    members.putAll(resources.members);
 
     return this;
   }
