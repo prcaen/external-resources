@@ -93,7 +93,7 @@ public final class Dispatcher {
   }
 
   private void performLaunch() {
-    boolean canRetryConnectivity = networkInfo == null || networkInfo.isConnected();
+    boolean canRetryConnectivity = null == networkInfo || networkInfo.isConnected();
 
     if (!airPlaneMode && canRetryConnectivity) {
       Logger.v(ExternalResources.TAG, "perform launch");
@@ -105,7 +105,7 @@ public final class Dispatcher {
   }
 
   private void performRetry() {
-    boolean canRetryConnectivity = networkInfo == null || networkInfo.isConnected();
+    boolean canRetryConnectivity = null == networkInfo || networkInfo.isConnected();
 
     if (resourcesRunnable.canRetry() && !airPlaneMode && canRetryConnectivity) {
       Logger.v(ExternalResources.TAG, "perform retry");
@@ -134,7 +134,7 @@ public final class Dispatcher {
   }
 
   private void performReplay() {
-    if (!needReplay || airPlaneMode || (networkInfo != null && !networkInfo.isConnected())) {
+    if (!needReplay || airPlaneMode || (null != networkInfo && !networkInfo.isConnected())) {
       return;
     }
 

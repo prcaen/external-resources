@@ -1,0 +1,20 @@
+<resources>
+  <string name="hello_world">Hello world!</string>
+  <string name="hello_world_with_args">Hello world %s!</string>
+  <string-array name="gender">
+    <item>M</item>
+    <item>Mrs</item>
+  </string-array>
+  <dimen name="standard_gauge">1435mm</dimen>
+  <bool name="is_enabled">true</bool>
+  <color name="red">#F00</color>
+  <integer name="network_connection_speed">5000</integer>
+  <integer-array name="prime_number">
+    <item>2</item>
+    <item>3</item>
+    <item>5</item>
+    <item>7</item>
+    <item>11</item>
+  </integer-array>
+
+</resources>

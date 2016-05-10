@@ -38,7 +38,7 @@ public class NetworkBroadcastReceiver extends BroadcastReceiver {
 
   @Override
   public void onReceive(Context context, Intent intent) {
-    if (intent == null) {
+    if (null == intent) {
       return;
     }
 

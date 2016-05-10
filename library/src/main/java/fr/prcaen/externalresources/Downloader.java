@@ -2,7 +2,6 @@ package fr.prcaen.externalresources;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.support.annotation.NonNull;
 
 import com.squareup.okhttp.CacheControl;
@@ -18,6 +17,10 @@ import fr.prcaen.externalresources.exception.ExternalResourceException;
 import fr.prcaen.externalresources.exception.ResponseException;
 import fr.prcaen.externalresources.model.Resources;
 import fr.prcaen.externalresources.url.Url;
+
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.HONEYCOMB_MR2;
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 public final class Downloader {
   private static final int CONNECT_TIMEOUT_MILLIS = 15 * 1000; // 15s
@@ -143,10 +146,6 @@ public final class Downloader {
       url.screenLayout(configuration.screenLayout);
     }
 
-    if (options.isUseScreenLayout()) {
-      url.screenLayout(configuration.screenLayout);
-    }
-
     if (options.isUseTouchscreen()) {
       url.touchscreen(configuration.touchscreen);
     }
@@ -155,11 +154,11 @@ public final class Downloader {
       url.uiMode(configuration.uiMode);
     }
 
-    if (options.isUseDensityDpi() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+    if (options.isUseDensityDpi() && SDK_INT >= JELLY_BEAN_MR1) {
       url.densityDpi(configuration.densityDpi);
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+    if (SDK_INT >= HONEYCOMB_MR2) {
       if (options.isUseScreenWidthDp()) {
         url.screenWidthDp(configuration.screenWidthDp);
       }

@@ -41,7 +41,7 @@ public final class Resource {
   }
 
   public boolean getAsBoolean() {
-    if (isBoolean() && getAsNonPrimitiveBoolean() != null) {
+    if (isBoolean() && null != getAsNonPrimitiveBoolean()) {
       return getAsNonPrimitiveBoolean();
     } else {
       return Boolean.parseBoolean(getAsString());
@@ -50,9 +50,9 @@ public final class Resource {
 
   @Nullable
   public String getAsString() {
-    if (isNumber() && getAsNumber() != null) {
+    if (isNumber() && null != getAsNumber()) {
       return getAsNumber().toString();
-    } else if (isBoolean() && getAsNonPrimitiveBoolean() != null) {
+    } else if (isBoolean() && null != getAsNonPrimitiveBoolean()) {
       return getAsNonPrimitiveBoolean().toString();
     } else if (isString()) {
       return (String) value;
@@ -63,9 +63,9 @@ public final class Resource {
 
   @Nullable
   public Float getAsFloat() {
-    if (isNumber() && getAsNumber() != null) {
+    if (isNumber() && null != getAsNumber()) {
       return getAsNumber().floatValue();
-    } else if (getAsString() != null) {
+    } else if (null != getAsString()) {
       try {
         return Float.parseFloat(getAsString());
       } catch (NumberFormatException e) {
@@ -78,9 +78,9 @@ public final class Resource {
 
   @Nullable
   public Integer getAsInt() {
-    if (isNumber() && getAsNumber() != null) {
+    if (isNumber() && null != getAsNumber()) {
       return getAsNumber().intValue();
-    } else if (getAsString() != null) {
+    } else if (null != getAsString()) {
       try {
         return Integer.parseInt(getAsString());
       } catch (NumberFormatException e) {
@@ -99,7 +99,7 @@ public final class Resource {
       for (int i = 0; i < resources.length; i++) {
         Resource resource = resources[i];
 
-        if (resource.getAsInt() != null) {
+        if (null != resource.getAsInt()) {
           integers[i] = resource.getAsInt();
         }
       }
@@ -123,7 +123,7 @@ public final class Resource {
       }
 
       return strings;
-    } else if (getAsString() != null) {
+    } else if (null != getAsString()) {
       return getAsString().split("(?!^)");
     } else {
       return new String[]{};

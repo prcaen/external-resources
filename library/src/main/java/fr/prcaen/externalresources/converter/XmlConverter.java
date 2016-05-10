@@ -45,7 +45,7 @@ public final class XmlConverter implements Converter {
         Node node = root.getChildNodes().item(i);
         if (node.getNodeType() == Node.ELEMENT_NODE) {
           SimpleEntry<String, Resource> entry = get(node);
-          if (entry != null) {
+          if (null != entry) {
             resources.add(entry.getKey(), entry.getValue());
           }
         }
@@ -67,7 +67,7 @@ public final class XmlConverter implements Converter {
     final String key = node.getAttributes().getNamedItem(ATTRIBUTE_NAME).getNodeValue();
     final Resource value = getResource(node);
 
-    if (value != null) {
+    if (null != value) {
       return new SimpleEntry<>(key, value);
     } else {
       return null;
@@ -112,7 +112,7 @@ public final class XmlConverter implements Converter {
       Node node = nodeList.item(i);
       if (node.getNodeType() == Node.ELEMENT_NODE) {
         Resource resource = getResource(clazz, node);
-        if (resource != null) {
+        if (null != resource) {
           resources.add(resource);
         }
       }

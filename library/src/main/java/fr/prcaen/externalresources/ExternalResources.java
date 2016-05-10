@@ -7,9 +7,17 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.AnyRes;
+import android.support.annotation.ArrayRes;
+import android.support.annotation.BoolRes;
 import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DimenRes;
+import android.support.annotation.IdRes;
+import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.util.DisplayMetrics;
 
 import java.util.ArrayList;
@@ -33,9 +41,9 @@ public class ExternalResources {
   protected static volatile ExternalResources singleton = null;
 
   @NonNull
-  private final DisplayMetrics metrics;
+  private final Context context;
   @NonNull
-  private final Resources defaultResources;
+  private final DisplayMetrics metrics;
   @NonNull
   private final Dispatcher dispatcher;
   @NonNull
@@ -44,21 +52,23 @@ public class ExternalResources {
   private final OnExternalResourcesLoadListener listener;
   @NonNull
   protected final ArrayList<OnExternalResourcesChangeListener> listeners = new ArrayList<>();
+  private final boolean useApplicationResources;
   @NonNull
   private Resources resources;
   @NonNull
   private Configuration configuration;
 
-  private ExternalResources(@NonNull Context context, @NonNull Converter converter, @NonNull Url url, @NonNull Options options, @Cache.Policy int cachePolicy, @Logger.Level int logLevel, @NonNull Resources defaultResources, @Nullable OnExternalResourcesLoadListener listener) {
+  private ExternalResources(@NonNull Context context, @NonNull Converter converter, @NonNull Url url, @NonNull Options options, @Cache.Policy int cachePolicy, @Logger.Level int logLevel, @NonNull Resources defaultResources, @Nullable OnExternalResourcesLoadListener listener, boolean useApplicationResources) {
     Logger.setLevel(logLevel);
 
+    this.context = context;
     this.dispatcher = new Dispatcher(context, new Downloader(context, converter, url, options), new ExternalResourcesHandler(this), cachePolicy);
     this.configuration = new Configuration(context.getResources().getConfiguration());
     this.metrics = context.getResources().getDisplayMetrics();
-    this.defaultResources = defaultResources;
     this.resources = defaultResources;
     this.options = options;
     this.listener = listener;
+    this.useApplicationResources = useApplicationResources;
 
     launch();
   }
@@ -79,42 +89,142 @@ public class ExternalResources {
     Logger.setLevel(logLevel);
   }
 
+  public boolean getBoolean(@BoolRes int resId) throws NotFoundException {
+    String key = getApplicationResourceEntryName(resId);
+
+    if (null == key) {
+      throw new NotFoundException("Boolean resource with resId: " + resId);
+    }
+
+    return getBoolean(key);
+  }
+
   public boolean getBoolean(@NonNull String key) throws NotFoundException {
     Resource resource = resources.get(key);
-    if (resource != null) {
+    if (null != resource) {
       return resource.getAsBoolean();
+    }
+
+    @BoolRes int resId = getApplicationResourceIdentifier(key, "bool");
+
+    if (0 != resId) {
+      boolean value = context.getResources().getBoolean(resId);
+      resources.add(key, new Resource(value));
+
+      return value;
     }
 
     throw new NotFoundException("Boolean resource with key: " + key);
   }
 
   @ColorInt
+  public int getColor(@ColorRes int resId) throws NotFoundException {
+    String key = getApplicationResourceEntryName(resId);
+
+    if (null == key) {
+      throw new NotFoundException("Color resource with resId: " + resId);
+    }
+
+    Resource resource = resources.get(key);
+    if (null != resource && null != resource.getAsString()) {
+      return Color.parseColor(resource.getAsString());
+    }
+
+    int value = Utils.getColor(context, resId);
+    resources.add(key, new Resource(value));
+
+    return value;
+  }
+
+  @ColorInt
   public int getColor(@NonNull String key) throws NotFoundException {
     Resource resource = resources.get(key);
-    if (resource != null && resource.getAsString() != null) {
-      return Color.parseColor(resource.getAsString());
+    if (null != resource) {
+      try {
+        return Color.parseColor(resource.getAsString());
+      } catch (IllegalArgumentException ignored) {
+      }
+    }
+
+    @ColorRes int resId = getApplicationResourceIdentifier(key, "color");
+
+    if (0 != resId) {
+      return Utils.getColor(context, resId);
     }
 
     throw new NotFoundException("Color resource with key: " + key);
   }
 
-  public float getDimension(@NonNull String key) throws NotFoundException {
-    String raw = getString(key);
+  public float getDimension(@DimenRes int resId) throws NotFoundException {
+    String key = getApplicationResourceEntryName(resId);
 
-    try {
-      return DimensionResource.fromString(raw).toFloat(metrics);
-    } catch (IllegalArgumentException e) {
-      throw new NotFoundException("Dimension resource with key: " + key);
+    if (null == key) {
+      throw new NotFoundException("Dimension resource with resId: " + resId);
     }
+
+    Resource resource = resources.get(key);
+    if (null != resource && null != resource.getAsString()) {
+      return DimensionResource.fromString(resource.getAsString()).toFloat(metrics);
+    }
+
+    return context.getResources().getDimension(resId);
+  }
+
+  public float getDimension(@NonNull String key) throws NotFoundException {
+    Resource resource = resources.get(key);
+    if (null != resource && null != resource.getAsString()) {
+      try {
+        return DimensionResource.fromString(resource.getAsString()).toFloat(metrics);
+      } catch (IllegalArgumentException ignored) {
+      }
+    }
+
+    @DimenRes int resId = getApplicationResourceIdentifier(key, "dimen");
+
+    if (0 != resId) {
+      float value = context.getResources().getDimension(resId);
+      resources.add(key, new Resource(value));
+
+      return value;
+    }
+
+    throw new NotFoundException("String resource with key: " + key);
+  }
+
+  public String getString(@StringRes int resId) throws NotFoundException {
+    String key = getApplicationResourceEntryName(resId);
+
+    if (null == key) {
+      throw new NotFoundException("String resource with resId: " + resId);
+    }
+
+    return getString(key);
   }
 
   public String getString(@NonNull String key) throws NotFoundException {
     Resource resource = resources.get(key);
-    if (resource != null) {
+    if (null != resource) {
       return resource.getAsString();
     }
 
+    @StringRes int resId = getApplicationResourceIdentifier(key, "string");
+
+    if (0 != resId) {
+      String value = context.getResources().getString(resId);
+      resources.add(key, new Resource(value));
+
+      return value;
+    }
+
     throw new NotFoundException("String resource with key: " + key);
+  }
+
+  public String getString(@StringRes int resId, Object... formatArgs) throws NotFoundException {
+    String key = getApplicationResourceEntryName(resId);
+    if (null == key) {
+      throw new NotFoundException("String resource with resId: " + resId);
+    }
+    return getString(key, formatArgs);
   }
 
   public String getString(@NonNull String key, Object... formatArgs) throws NotFoundException {
@@ -122,28 +232,101 @@ public class ExternalResources {
     return String.format(configuration.locale, raw, formatArgs);
   }
 
+  public String[] getStringArray(@ArrayRes int resId) throws NotFoundException {
+    String key = getApplicationResourceEntryName(resId);
+
+    if (null == key) {
+      throw new NotFoundException("String array resource with resId: " + resId);
+    }
+
+    return getStringArray(key);
+  }
+
   public String[] getStringArray(@NonNull String key) throws NotFoundException {
     Resource resource = resources.get(key);
-    if (resource != null) {
+    if (null != resource) {
       return resource.getAsStringArray();
+    }
+
+    @ArrayRes int resId = getApplicationResourceIdentifier(key, "array");
+
+    if (0 != resId) {
+      String[] values = context.getResources().getStringArray(resId);
+      Resource[] stringResources = new Resource[values.length];
+
+      for (int i = 0; i < values.length; i++) {
+        stringResources[i] = new Resource(values[i]);
+      }
+
+      resources.add(key, new Resource(stringResources));
+
+      return values;
     }
 
     throw new NotFoundException("String array resource with key: " + key);
   }
 
+  public int getInteger(@IntegerRes int resId) throws NotFoundException {
+    String key = getApplicationResourceEntryName(resId);
+
+    if (null != key) {
+      Resource resource = resources.get(key);
+      if (null != resource && null != resource.getAsInt()) {
+        return resource.getAsInt();
+      }
+    }
+
+    throw new NotFoundException("Integer resource with resId: " + resId);
+  }
+
   public int getInteger(@NonNull String key) throws NotFoundException {
     Resource resource = resources.get(key);
-    if (resource != null && resource.getAsInt() != null) {
+    if (null != resource && null != resource.getAsInt()) {
       return resource.getAsInt();
     }
 
-    throw new NotFoundException("Int resource with key: " + key);
+    @IntegerRes int resId = getApplicationResourceIdentifier(key, "integer");
+
+    if (0 != resId) {
+      int value = context.getResources().getInteger(resId);
+      resources.add(key, new Resource(value));
+
+      return value;
+    }
+
+    throw new NotFoundException("Integer resource with key: " + key);
+  }
+
+  public int[] getIntArray(@ArrayRes int resId) throws NotFoundException {
+    String key = getApplicationResourceEntryName(resId);
+
+    if (null == key) {
+      throw new NotFoundException("Int array resource with resId: " + resId);
+    }
+
+    return getIntArray(key);
   }
 
   public int[] getIntArray(@NonNull String key) throws NotFoundException {
     Resource resource = resources.get(key);
-    if (resource != null) {
+    if (null != resource && null != resource.getAsIntegerArray()) {
       return resource.getAsIntegerArray();
+    }
+
+    @ArrayRes int resId = getApplicationResourceIdentifier(key, "array");
+
+    if (0 != resId) {
+      int[] values = context.getResources().getIntArray(resId);
+
+      Resource[] intResources = new Resource[values.length];
+
+      for (int i = 0; i < values.length; i++) {
+        intResources[i] = new Resource(values[i]);
+      }
+
+      resources.add(key, new Resource(intResources));
+
+      return values;
     }
 
     throw new NotFoundException("Int array resource with key: " + key);
@@ -165,7 +348,7 @@ public class ExternalResources {
 
   public void onResourcesLoadSuccess(Resources resources) {
     Logger.i(TAG, "onResourcesLoadSuccess");
-    this.resources = defaultResources.merge(resources);
+    this.resources.merge(resources);
 
     triggerChange();
   }
@@ -173,7 +356,7 @@ public class ExternalResources {
   public void onResourcesLoadFailed(ExternalResourceException exception) {
     Logger.e(TAG, "onResourcesLoadFailed", exception);
 
-    if (listener != null) {
+    if (null != listener) {
       listener.onExternalResourcesLoadFailed(exception);
     }
   }
@@ -182,6 +365,20 @@ public class ExternalResources {
     Logger.v(TAG, "Launch");
 
     dispatcher.dispatchLaunch();
+  }
+
+  @Nullable
+  private String getApplicationResourceEntryName(@AnyRes int resId) throws IllegalStateException {
+    if(!useApplicationResources) {
+      throw new IllegalStateException("You have set the useApplicationResources to false, using application resource is an error.");
+    }
+
+    return Utils.getAndroidResourceEntryName(context, resId);
+  }
+
+  @IdRes
+  private int getApplicationResourceIdentifier(String key, String defType) {
+    return useApplicationResources ? Utils.getAndroidResourceIdentifier(context, key, defType) : 0;
   }
 
   @SuppressWarnings("ConstantConditions")
@@ -206,12 +403,12 @@ public class ExternalResources {
   }
 
   private void triggerChange() {
-    if (listener != null) {
+    if (null != listener) {
       listener.onExternalResourcesChange(this);
     }
 
     for (OnExternalResourcesChangeListener listener : listeners) {
-      if (listener != null) {
+      if (null != listener) {
         Logger.v(TAG, "Trigger change for listener: " + listener.getClass().getSimpleName());
         listener.onExternalResourcesChange(this);
       }
@@ -220,16 +417,16 @@ public class ExternalResources {
 
   @SuppressWarnings("ConstantConditions")
   public static ExternalResources initialize(@NonNull Context context, Url url) {
-    if (context == null) {
+    if (null == context) {
       throw new IllegalArgumentException("Context must not be null.");
     }
 
-    if (url == null) {
+    if (null == url) {
       throw new IllegalArgumentException("Path must not be null.");
     }
 
     synchronized (ExternalResources.class) {
-      if (singleton != null) {
+      if (null != singleton) {
         throw new IllegalStateException("Singleton instance already exists.");
       }
 
@@ -241,16 +438,16 @@ public class ExternalResources {
 
   @SuppressWarnings("ConstantConditions")
   public static ExternalResources initialize(@NonNull Context context, @NonNull String path) {
-    if (context == null) {
+    if (null == context) {
       throw new IllegalArgumentException("Context must not be null.");
     }
 
-    if (path == null) {
+    if (null == path) {
       throw new IllegalArgumentException("Path must not be null.");
     }
 
     synchronized (ExternalResources.class) {
-      if (singleton != null) {
+      if (null != singleton) {
         throw new IllegalStateException("Singleton instance already exists.");
       }
 
@@ -262,16 +459,16 @@ public class ExternalResources {
 
   @SuppressWarnings("ConstantConditions")
   public static ExternalResources initialize(@NonNull Context context, Url url, Resources resources) {
-    if (context == null) {
+    if (null == context) {
       throw new IllegalArgumentException("Context must not be null.");
     }
 
-    if (url == null) {
+    if (null == url) {
       throw new IllegalArgumentException("Path must not be null.");
     }
 
     synchronized (ExternalResources.class) {
-      if (singleton != null) {
+      if (null != singleton) {
         throw new IllegalStateException("Singleton instance already exists.");
       }
 
@@ -283,16 +480,16 @@ public class ExternalResources {
 
   @SuppressWarnings("ConstantConditions")
   public static ExternalResources initialize(@NonNull Context context, @NonNull String path, Resources defaultResources) {
-    if (context == null) {
+    if (null == context) {
       throw new IllegalArgumentException("Context must not be null.");
     }
 
-    if (path == null) {
+    if (null == path) {
       throw new IllegalArgumentException("Path must not be null.");
     }
 
     synchronized (ExternalResources.class) {
-      if (singleton != null) {
+      if (null != singleton) {
         throw new IllegalStateException("Singleton instance already exists.");
       }
 
@@ -304,11 +501,11 @@ public class ExternalResources {
 
   @SuppressWarnings("ConstantConditions")
   public static ExternalResources initialize(@NonNull ExternalResources externalResources) {
-    if (externalResources == null) {
+    if (null == externalResources) {
       throw new IllegalArgumentException("ExternalResources must not be null.");
     }
     synchronized (ExternalResources.class) {
-      if (singleton != null) {
+      if (null != singleton) {
         throw new IllegalStateException("Singleton instance already exists.");
       }
 
@@ -319,7 +516,7 @@ public class ExternalResources {
   }
 
   public static ExternalResources getInstance() {
-    if (singleton == null) {
+    if (null == singleton) {
       throw new IllegalArgumentException("You should call initialize() before getInstance().");
     }
 
@@ -343,13 +540,14 @@ public class ExternalResources {
     private Options options;
     @Nullable
     private Converter converter;
+    private boolean useApplicationResources = true;
 
     public Builder(@NonNull Context context, @NonNull Url url) {
-      if (context == null) {
+      if (null == context) {
         throw new IllegalArgumentException("Context must not be null.");
       }
 
-      if (url == null) {
+      if (null == url) {
         throw new IllegalArgumentException("Url must not be null.");
       }
 
@@ -368,11 +566,11 @@ public class ExternalResources {
     }
 
     public Builder defaultResources(@NonNull Resources defaultResources) {
-      if (defaultResources == null) {
+      if (null == defaultResources) {
         throw new IllegalArgumentException("Default resources must not be null.");
       }
 
-      if (this.defaultResources != null) {
+      if (null != this.defaultResources) {
         throw new IllegalStateException("Default resources already set.");
       }
 
@@ -382,11 +580,11 @@ public class ExternalResources {
     }
 
     public Builder listener(@NonNull OnExternalResourcesLoadListener listener) {
-      if (listener == null) {
+      if (null == listener) {
         throw new IllegalArgumentException("Listener must not be null.");
       }
 
-      if (this.listener != null) {
+      if (null != this.listener) {
         throw new IllegalStateException("Listener already set.");
       }
 
@@ -396,11 +594,11 @@ public class ExternalResources {
     }
 
     public Builder options(@NonNull Options options) {
-      if (options == null) {
+      if (null == options) {
         throw new IllegalArgumentException("Options must not be null.");
       }
 
-      if (this.options != null) {
+      if (null != this.options) {
         throw new IllegalStateException("Options already set.");
       }
 
@@ -416,11 +614,11 @@ public class ExternalResources {
     }
 
     public Builder converter(@NonNull Converter converter) {
-      if (converter == null) {
+      if (null == converter) {
         throw new IllegalArgumentException("Converter must not be null.");
       }
 
-      if (this.converter != null) {
+      if (null != this.converter) {
         throw new IllegalStateException("Converter already set.");
       }
 
@@ -429,20 +627,26 @@ public class ExternalResources {
       return this;
     }
 
+    public Builder useApplicationResources(boolean useApplicationResources) {
+      this.useApplicationResources = useApplicationResources;
+
+      return this;
+    }
+
     public ExternalResources build() {
-      if (defaultResources == null) {
+      if (null == defaultResources) {
         this.defaultResources = new Resources();
       }
 
-      if (options == null) {
+      if (null == options) {
         this.options = Options.createDefault();
       }
 
-      if (converter == null) {
+      if (null == converter) {
         this.converter = new JsonConverter();
       }
 
-      return new ExternalResources(context, converter, url, options, cachePolicy, logLevel, defaultResources, listener);
+      return new ExternalResources(context, converter, url, options, cachePolicy, logLevel, defaultResources, listener, useApplicationResources);
     }
   }
 

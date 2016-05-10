@@ -7,8 +7,9 @@ import org.robolectric.annotation.Config;
 
 import java.util.Locale;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
@@ -188,12 +189,13 @@ public final class DefaultUrlTest {
 
   @Test
   public void testBuild() throws Exception {
-    String finalUrl = BASE_URL + "?screen_height_dp=7&density_dpi=5";
     url = new DefaultUrl(BASE_URL);
 
     url.screenHeightDp(7);
     url.densityDpi(5);
 
-    assertEquals("URL String: " + finalUrl, url.build(), finalUrl);
+    String urlString = url.build();
+    assertThat("Contains density_dpi", urlString, containsString("density_dpi=5"));
+    assertThat("Contains screen_height_dp", urlString, containsString("screen_height_dp=7"));
   }
 }

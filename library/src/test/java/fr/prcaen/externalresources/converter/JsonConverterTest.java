@@ -41,7 +41,7 @@ public class JsonConverterTest {
 
   @Test
   public void testFromStringNull() throws Exception {
-    assertTrue(new JsonConverter().fromString("") == null);
+    assertTrue(null == new JsonConverter().fromString(""));
   }
 
   @Test

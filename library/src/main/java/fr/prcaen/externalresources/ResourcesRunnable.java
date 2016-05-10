@@ -30,7 +30,7 @@ public final class ResourcesRunnable implements Runnable {
 
     try {
       Resources resources = downloader.load(cachePolicy);
-      if (resources != null) {
+      if (null != resources) {
         dispatcher.dispatchDone(resources);
       } else {
         dispatcher.dispatchFailed(new ExternalResourceException("Resources are null."));

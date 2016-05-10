@@ -3,6 +3,7 @@ package fr.prcaen.externalresources;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.Build;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -29,7 +30,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 @SuppressWarnings("ConstantConditions")
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE)
+@Config(manifest = "src/main/AndroidManifest.xml", sdk = Build.VERSION_CODES.JELLY_BEAN)
 public class ExternalResourcesTest {
   @Mock
   private Context context;
@@ -68,6 +69,8 @@ public class ExternalResourcesTest {
   @Test
   public void testGetBoolean() throws Exception {
     assertTrue(externalResources.getBoolean("screen_small"));
+    assertTrue(externalResources.getBoolean(R.bool.is_enabled));
+    assertTrue(externalResources.getBoolean("is_enabled"));
   }
 
   @Test(expected = NotFoundException.class)
@@ -75,9 +78,16 @@ public class ExternalResourcesTest {
     externalResources.getBoolean("unknown");
   }
 
+  @Test(expected = NotFoundException.class)
+  public void testGetResBooleanNotFound() throws Exception {
+    externalResources.getBoolean(0);
+  }
+
   @Test
   public void testGetColor() throws Exception {
-    assertEquals(externalResources.getColor("translucent_red"), Color.parseColor("#80ff0000"));
+    assertEquals(Color.parseColor("#80ff0000"), externalResources.getColor("translucent_red"));
+    assertEquals(Color.parseColor("#FF0000"), externalResources.getColor(R.color.red));
+    assertEquals(Color.parseColor("#FF0000"), externalResources.getColor("red"));
   }
 
   @Test(expected = NotFoundException.class)
@@ -85,9 +95,16 @@ public class ExternalResourcesTest {
     externalResources.getColor("unknown");
   }
 
+  @Test(expected = NotFoundException.class)
+  public void testGetResColorNotFound() throws Exception {
+    externalResources.getColor(0);
+  }
+
   @Test
   public void testGetDimension() throws Exception {
-    assertEquals(externalResources.getDimension("textview_height"), 25f);
+    assertEquals(25f, externalResources.getDimension("textview_height"));
+    assertEquals(13559.055f, externalResources.getDimension(R.dimen.standard_gauge));
+    assertEquals(13559.055f, externalResources.getDimension("standard_gauge"));
   }
 
   @Test(expected = NotFoundException.class)
@@ -103,16 +120,27 @@ public class ExternalResourcesTest {
   @Test
   public void testGetString() throws Exception {
     assertEquals(externalResources.getString("hello"), "Hello!");
+    assertEquals(externalResources.getString("hello_world"), "Hello world!");
+    assertEquals(externalResources.getString(R.string.hello_world), "Hello world!");
   }
 
+  @SuppressWarnings("ResourceType")
   @Test(expected = NotFoundException.class)
   public void testGetStringNotFound() throws Exception {
     externalResources.getString("unknown");
   }
 
+  @SuppressWarnings("ResourceType")
+  @Test(expected = NotFoundException.class)
+  public void testGetResStringNotFound() throws Exception {
+    externalResources.getString(0);
+  }
+
   @Test
   public void testGetStringWithArguments() throws Exception {
-    assertEquals(externalResources.getString("string_with_args", "Peter"), "Hello Peter!");
+    assertEquals("Hello Peter!", externalResources.getString("string_with_args", "Peter"));
+    assertEquals("Hello world Peter!", externalResources.getString("hello_world_with_args", "Peter"));
+    assertEquals("Hello world Peter!", externalResources.getString(R.string.hello_world_with_args, "Peter"));
   }
 
   @Test(expected = NotFoundException.class)
@@ -120,9 +148,16 @@ public class ExternalResourcesTest {
     externalResources.getString("unknown", "bar");
   }
 
+  @Test(expected = NotFoundException.class)
+  public void testGetResStringWithArgumentsNotFound() throws Exception {
+    externalResources.getString(0, "bar");
+  }
+
   @Test
   public void testGetStringArray() throws Exception {
-    assertEquals(externalResources.getStringArray("planets_array").length, 4);
+    assertEquals(4, externalResources.getStringArray("planets_array").length);
+    assertEquals(2, externalResources.getStringArray("gender").length);
+    assertEquals(2, externalResources.getStringArray(R.array.gender).length);
   }
 
   @Test(expected = NotFoundException.class)
@@ -130,9 +165,16 @@ public class ExternalResourcesTest {
     externalResources.getStringArray("unknown");
   }
 
+  @Test(expected = NotFoundException.class)
+  public void testGetResStringArrayNotFound() throws Exception {
+    externalResources.getStringArray(0);
+  }
+
   @Test
   public void testGetInteger() throws Exception {
-    assertEquals(externalResources.getInteger("max_speed"), 75);
+    assertEquals(75, externalResources.getInteger("max_speed"));
+    assertEquals(5000, externalResources.getInteger("network_connection_speed"));
+    assertEquals(5000, externalResources.getInteger(R.integer.network_connection_speed));
   }
 
   @Test(expected = NotFoundException.class)
@@ -140,14 +182,26 @@ public class ExternalResourcesTest {
     externalResources.getInteger("unknown");
   }
 
+  @Test(expected = NotFoundException.class)
+  public void testGetResIntegerNotFound() throws Exception {
+    externalResources.getInteger(0);
+  }
+
   @Test
   public void testGetIntArray() throws Exception {
-    assertEquals(externalResources.getIntArray("bits").length, 4);
+    assertEquals(4, externalResources.getIntArray("bits").length);
+    assertEquals(5, externalResources.getIntArray("prime_number").length);
+    assertEquals(5, externalResources.getIntArray(R.array.prime_number).length);
   }
 
   @Test(expected = NotFoundException.class)
   public void testGetIntArrayNotFound() throws Exception {
     externalResources.getIntArray("unknown");
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testGetResIntArrayNotFound() throws Exception {
+    externalResources.getIntArray(0);
   }
 
   @Test
@@ -378,5 +432,17 @@ public class ExternalResourcesTest {
   public void testBuilderConverterAlreadyDefined() throws Exception {
     ExternalResources.Builder builder = new ExternalResources.Builder(context, new DefaultUrl("/")).converter(new JsonConverter());
     builder.converter(new JsonConverter());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void testGetResWithUseApplicationResourcesToFalse() {
+    ExternalResources.Builder builder = new ExternalResources.Builder(context, "/").useApplicationResources(false);
+    builder.build().getString(R.string.hello_world);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testGetWithUseApplicationResourcesToFalse() {
+    ExternalResources.Builder builder = new ExternalResources.Builder(context, "/").useApplicationResources(false);
+    builder.build().getString("hello_world");
   }
 }

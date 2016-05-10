@@ -31,7 +31,7 @@ public final class JsonConverter implements Converter {
   public Resources fromReader(Reader reader) throws IOException {
     JsonObject jsonObject = GSON.fromJson(reader, JsonObject.class);
 
-    if(jsonObject == null) {
+    if(null == jsonObject) {
       return null;
     }
 
@@ -40,7 +40,7 @@ public final class JsonConverter implements Converter {
     for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
       Resource resource = GSON.fromJson(entry.getValue(), Resource.class);
 
-      if (resource != null) {
+      if (null != resource) {
         resources.add(entry.getKey(), resource);
       }
     }
