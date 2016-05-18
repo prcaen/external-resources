@@ -22,24 +22,24 @@ import static android.os.Build.VERSION_CODES.M;
 
 public final class Utils {
 
-  @Nullable
-  public static NetworkInfo getActiveNetworkInfo(Context context) {
-    if(!hasNetworkStatePermission(context)) {
-      Logger.w(ExternalResources.TAG, "To work perfectly, ACCESS_NETWORK_STATE permission is required.");
+  @Nullable public static NetworkInfo getActiveNetworkInfo(Context context) {
+    if (!hasNetworkStatePermission(context)) {
+      Logger.w(ExternalResources.TAG,
+          "To work perfectly, ACCESS_NETWORK_STATE permission is required.");
       return null;
     }
 
-    ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
+    ConnectivityManager connectivityManager =
+        (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
     return connectivityManager.getActiveNetworkInfo();
   }
 
-  @TargetApi(JELLY_BEAN_MR1)
-  @SuppressWarnings("deprecation")
+  @TargetApi(JELLY_BEAN_MR1) @SuppressWarnings("deprecation")
   public static boolean isAirplaneModeOn(Context context) {
     ContentResolver contentResolver = context.getContentResolver();
 
     try {
-      if(SDK_INT < JELLY_BEAN_MR1) {
+      if (SDK_INT < JELLY_BEAN_MR1) {
         return Settings.System.getInt(contentResolver, Settings.System.AIRPLANE_MODE_ON, 0) != 0;
       } else {
         return Settings.Global.getInt(contentResolver, Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
@@ -57,18 +57,16 @@ public final class Utils {
     return hasPermission(context, ACCESS_NETWORK_STATE);
   }
 
-  @SuppressWarnings("deprecation")
-  @ColorInt
+  @SuppressWarnings("deprecation") @ColorInt
   public static int getColor(Context context, @ColorRes int resId) {
-    if(SDK_INT >= M) {
+    if (SDK_INT >= M) {
       return context.getColor(resId);
     } else {
       return context.getResources().getColor(resId);
     }
   }
 
-  @Nullable
-  public static String getAndroidResourceEntryName(Context context, @AnyRes int resId) {
+  @Nullable public static String getAndroidResourceEntryName(Context context, @AnyRes int resId) {
     try {
       return context.getResources().getResourceEntryName(resId);
     } catch (android.content.res.Resources.NotFoundException e) {

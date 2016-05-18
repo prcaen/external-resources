@@ -19,3 +19,8 @@ ext {
   compileSdkVersion = 23
   buildToolsVersion = '23.0.3'
 }
+
+ext.dependenciesVersion = [
+    support: '23.4.0',
+    okhttp: '2.7.5'
+]

@@ -13,5 +13,4 @@ public class ExternalResourceException extends RuntimeException {
   public ExternalResourceException(Throwable cause) {
     super(cause);
   }
-
 }

@@ -1,7 +1,15 @@
 package fr.prcaen.externalresources.converter;
 
 import android.support.annotation.Nullable;
-
+import fr.prcaen.externalresources.model.Resource;
+import fr.prcaen.externalresources.model.Resources;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -9,18 +17,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import fr.prcaen.externalresources.model.Resource;
-import fr.prcaen.externalresources.model.Resources;
 
 public final class XmlConverter implements Converter {
   private static final String ATTRIBUTE_NAME = "name";
@@ -33,8 +29,16 @@ public final class XmlConverter implements Converter {
   private static final String STRING_ARRAY_NODE_NAME = "string-array";
   private static final String INTEGER_ARRAY_NODE_NAME = "integer-array";
 
-  @Override
-  public Resources fromReader(Reader reader) throws IOException {
+  protected static Document read(Reader xml)
+      throws ParserConfigurationException, IOException, SAXException {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setIgnoringElementContentWhitespace(true);
+    factory.setNamespaceAware(true);
+
+    return factory.newDocumentBuilder().parse(new InputSource(xml));
+  }
+
+  @Override public Resources fromReader(Reader reader) throws IOException {
     try {
       Document document = read(reader);
       Resources resources = new Resources();
@@ -57,13 +61,11 @@ public final class XmlConverter implements Converter {
     }
   }
 
-  @SuppressWarnings("unused")
-  public Resources fromString(String string) throws IOException {
+  @SuppressWarnings("unused") public Resources fromString(String string) throws IOException {
     return fromReader(new StringReader(string));
   }
 
-  @Nullable
-  protected SimpleEntry<String, Resource> get(Node node) throws DOMException {
+  @Nullable protected SimpleEntry<String, Resource> get(Node node) throws DOMException {
     final String key = node.getAttributes().getNamedItem(ATTRIBUTE_NAME).getNodeValue();
     final Resource value = getResource(node);
 
@@ -74,8 +76,7 @@ public final class XmlConverter implements Converter {
     }
   }
 
-  @Nullable
-  protected Resource getResource(Node node) {
+  @Nullable protected Resource getResource(Node node) {
     switch (node.getNodeName()) {
       case STRING_NODE_NAME:
       case COLOR_NODE_NAME:
@@ -94,8 +95,7 @@ public final class XmlConverter implements Converter {
     }
   }
 
-  @Nullable
-  protected <T> Resource getResource(Class<T> clazz, Node node) {
+  @Nullable protected <T> Resource getResource(Class<T> clazz, Node node) {
     if (clazz.equals(Integer.class)) {
       return new Resource(Integer.valueOf(node.getTextContent()));
     } else if (clazz.equals(String.class)) {
@@ -119,13 +119,5 @@ public final class XmlConverter implements Converter {
     }
 
     return new Resource(resources.toArray(new Resource[resources.size()]));
-  }
-
-  protected static Document read(Reader xml) throws ParserConfigurationException, IOException, SAXException {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setIgnoringElementContentWhitespace(true);
-    factory.setNamespaceAware(true);
-
-    return factory.newDocumentBuilder().parse(new InputSource(xml));
   }
 }

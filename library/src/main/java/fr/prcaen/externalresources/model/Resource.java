@@ -2,7 +2,6 @@ package fr.prcaen.externalresources.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import com.google.gson.internal.LazilyParsedNumber;
 
 public final class Resource {
@@ -48,8 +47,7 @@ public final class Resource {
     }
   }
 
-  @Nullable
-  public String getAsString() {
+  @Nullable public String getAsString() {
     if (isNumber() && null != getAsNumber()) {
       return getAsNumber().toString();
     } else if (isBoolean() && null != getAsNonPrimitiveBoolean()) {
@@ -61,8 +59,7 @@ public final class Resource {
     }
   }
 
-  @Nullable
-  public Float getAsFloat() {
+  @Nullable public Float getAsFloat() {
     if (isNumber() && null != getAsNumber()) {
       return getAsNumber().floatValue();
     } else if (null != getAsString()) {
@@ -76,8 +73,7 @@ public final class Resource {
     }
   }
 
-  @Nullable
-  public Integer getAsInt() {
+  @Nullable public Integer getAsInt() {
     if (isNumber() && null != getAsNumber()) {
       return getAsNumber().intValue();
     } else if (null != getAsString()) {
@@ -106,12 +102,11 @@ public final class Resource {
 
       return integers;
     } else {
-      return new int[]{};
+      return new int[] {};
     }
   }
 
-  @NonNull
-  public String[] getAsStringArray() {
+  @NonNull public String[] getAsStringArray() {
     if (isArray()) {
       Resource[] resources = getAsArray();
       String[] strings = new String[resources.length];
@@ -126,12 +121,11 @@ public final class Resource {
     } else if (null != getAsString()) {
       return getAsString().split("(?!^)");
     } else {
-      return new String[]{};
+      return new String[] {};
     }
   }
 
-  @Nullable
-  protected Number getAsNumber() {
+  @Nullable protected Number getAsNumber() {
     if (isString()) {
       return new LazilyParsedNumber((String) value);
     } else if (isNumber()) {
@@ -141,17 +135,15 @@ public final class Resource {
     }
   }
 
-  @NonNull
-  protected Resource[] getAsArray() {
+  @NonNull protected Resource[] getAsArray() {
     try {
       return (Resource[]) value;
     } catch (ClassCastException e) {
-      return new Resource[]{};
+      return new Resource[] {};
     }
   }
 
-  @Nullable
-  protected Boolean getAsNonPrimitiveBoolean() {
+  @Nullable protected Boolean getAsNonPrimitiveBoolean() {
     try {
       return (Boolean) value;
     } catch (ClassCastException e) {

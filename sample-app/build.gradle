@@ -1,18 +1,18 @@
-apply plugin: 'com.android.application'
+apply plugin: "com.android.application"
 
 android {
   signingConfigs {
     release {
-      keyAlias 'sample_app'
-      keyPassword '123456789'
-      storeFile file('release.jks')
-      storePassword '123456789'
+      keyAlias "sample_app"
+      keyPassword "123456789"
+      storeFile file("release.jks")
+      storePassword "123456789"
     }
   }
   compileSdkVersion rootProject.ext.compileSdkVersion
   buildToolsVersion rootProject.ext.buildToolsVersion
   defaultConfig {
-    applicationId 'fr.prcaen.externalresources.sample'
+    applicationId "fr.prcaen.externalresources.sample"
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.compileSdkVersion
   }
@@ -21,12 +21,12 @@ android {
       signingConfig signingConfigs.release
       minifyEnabled true
       shrinkResources true
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
     }
   }
 }
 
 dependencies {
-  compile project(':library')
-  compile 'com.android.support:appcompat-v7:23.3.0'
+  compile project(":library")
+  compile "com.android.support:appcompat-v7:${dependenciesVersion.support}"
 }

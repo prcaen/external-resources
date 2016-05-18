@@ -9,25 +9,21 @@ import android.os.Message;
 import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import fr.prcaen.externalresources.exception.ExternalResourceException;
 import fr.prcaen.externalresources.model.Resources;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static fr.prcaen.externalresources.ResourcesRunnable.RETRY_COUNT;
 
 public final class Dispatcher {
 
+  public static final int REQUEST_DONE = 5;
+  public static final int REQUEST_FAILED = 6;
   private static final int REQUEST_LAUNCH = 1;
   private static final int REQUEST_RETRY = 2;
   private static final int NETWORK_STATE_CHANGE = 3;
   private static final int AIRPLANE_MODE_CHANGE = 4;
-
-  public static final int REQUEST_DONE = 5;
-  public static final int REQUEST_FAILED = 6;
-
   private static final int RETRY_DELAY = 1000;
 
   private final Context context;
@@ -37,13 +33,13 @@ public final class Dispatcher {
   private final Handler handler;
   private final Handler mainHandler;
 
-  @Nullable
-  private NetworkInfo networkInfo;
+  @Nullable private NetworkInfo networkInfo;
   private boolean airPlaneMode;
   private ResourcesRunnable resourcesRunnable;
   private boolean needReplay = false;
 
-  public Dispatcher(@NonNull Context context, @NonNull Downloader downloader, @NonNull Handler mainHandler, @Cache.Policy int cachePolicy) {
+  public Dispatcher(@NonNull Context context, @NonNull Downloader downloader,
+      @NonNull Handler mainHandler, @Cache.Policy int cachePolicy) {
     this.context = context;
     this.service = Executors.newSingleThreadExecutor();
     this.dispatcherThread = new DispatcherThread();
@@ -122,7 +118,7 @@ public final class Dispatcher {
   private void performAirPlaneModeChange(boolean airPlaneMode) {
     this.airPlaneMode = airPlaneMode;
 
-    if(!Utils.hasNetworkStatePermission(context)) {
+    if (!Utils.hasNetworkStatePermission(context)) {
       performReplay();
     }
   }
@@ -151,8 +147,7 @@ public final class Dispatcher {
       this.dispatcher = dispatcher;
     }
 
-    @Override
-    public void handleMessage(Message message) {
+    @Override public void handleMessage(Message message) {
       switch (message.what) {
         case REQUEST_LAUNCH:
           dispatcher.performLaunch();
@@ -171,7 +166,6 @@ public final class Dispatcher {
           break;
       }
     }
-
   }
 
   private static class DispatcherThread extends HandlerThread {
@@ -181,7 +175,5 @@ public final class Dispatcher {
     DispatcherThread() {
       super(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
     }
-
   }
-
 }

@@ -1,5 +1,6 @@
 # Android studio
-.idea/
+.idea/*
+!.idea/codeStyleSettings.xml
 *.iml
 
 # Built application files

@@ -39,6 +39,10 @@ public final class Options {
     this.useSmallestScreenWidthDp = builder.useSmallestScreenWidthDp;
   }
 
+  public static Options createDefault() {
+    return new Builder().build();
+  }
+
   public boolean isUseFontScale() {
     return useFontScale;
   }
@@ -231,9 +235,5 @@ public final class Options {
     public Options build() {
       return new Options(this);
     }
-  }
-
-  public static Options createDefault() {
-    return new Builder().build();
   }
 }

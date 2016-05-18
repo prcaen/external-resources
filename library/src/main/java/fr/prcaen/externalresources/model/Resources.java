@@ -1,7 +1,9 @@
 package fr.prcaen.externalresources.model;
 
 import android.support.annotation.NonNull;
-
+import fr.prcaen.externalresources.converter.Converter;
+import fr.prcaen.externalresources.converter.JsonConverter;
+import fr.prcaen.externalresources.converter.XmlConverter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,12 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import fr.prcaen.externalresources.converter.Converter;
-import fr.prcaen.externalresources.converter.JsonConverter;
-import fr.prcaen.externalresources.converter.XmlConverter;
-
-@SuppressWarnings("unused")
-public final class Resources {
+@SuppressWarnings("unused") public final class Resources {
   protected final ConcurrentHashMap<String, Resource> members;
 
   public Resources() {
@@ -25,29 +22,6 @@ public final class Resources {
 
   public Resources(@NonNull ConcurrentHashMap<String, Resource> members) {
     this.members = members;
-  }
-
-  public Resource add(String key, Resource value) {
-    return members.put(key, value);
-  }
-
-  @NonNull
-  protected Set<Entry<String, Resource>> entrySet() {
-    return members.entrySet();
-  }
-
-  public boolean has(String key) {
-    return members.containsKey(key);
-  }
-
-  public Resource get(String key) {
-    return members.get(key);
-  }
-
-  public Resources merge(Resources resources) {
-    members.putAll(resources.members);
-
-    return this;
   }
 
   public static Resources from(Reader reader, Converter converter) throws IOException {
@@ -80,5 +54,27 @@ public final class Resources {
 
   public static Resources fromXml(InputStream reader) throws IOException {
     return fromXml(new InputStreamReader(reader));
+  }
+
+  public Resource add(String key, Resource value) {
+    return members.put(key, value);
+  }
+
+  @NonNull protected Set<Entry<String, Resource>> entrySet() {
+    return members.entrySet();
+  }
+
+  public boolean has(String key) {
+    return members.containsKey(key);
+  }
+
+  public Resource get(String key) {
+    return members.get(key);
+  }
+
+  public Resources merge(Resources resources) {
+    members.putAll(resources.members);
+
+    return this;
   }
 }

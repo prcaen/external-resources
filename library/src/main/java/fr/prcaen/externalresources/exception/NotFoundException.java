@@ -13,5 +13,4 @@ public class NotFoundException extends ExternalResourceException {
   public NotFoundException(Throwable cause) {
     super(cause);
   }
-
 }
