@@ -1,1 +1,3 @@
 include ':sample-app', ':library'
+
+rootProject.name = 'external-resources-parent'

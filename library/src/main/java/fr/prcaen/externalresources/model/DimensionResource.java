@@ -21,11 +21,8 @@ public final class DimensionResource {
     this.value = value;
   }
 
-  public float toFloat(DisplayMetrics metrics) {
-    return TypedValue.applyDimension(type, value, metrics);
-  }
-
-  public static DimensionResource fromString(@NonNull String resource) throws IllegalArgumentException {
+  public static DimensionResource fromString(@NonNull String resource)
+      throws IllegalArgumentException {
     return new DimensionResource(getTypeFromString(resource), getValueFromString(resource));
   }
 
@@ -65,5 +62,9 @@ public final class DimensionResource {
     } else {
       return TypedValue.COMPLEX_UNIT_PX;
     }
+  }
+
+  public float toFloat(DisplayMetrics metrics) {
+    return TypedValue.applyDimension(type, value, metrics);
   }
 }

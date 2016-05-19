@@ -1,7 +1,6 @@
 package fr.prcaen.externalresources;
 
 import android.support.annotation.NonNull;
-
 import fr.prcaen.externalresources.exception.ExternalResourceException;
 import fr.prcaen.externalresources.exception.ResponseException;
 import fr.prcaen.externalresources.model.Resources;
@@ -13,24 +12,23 @@ public final class ResourcesRunnable implements Runnable {
 
   private final Downloader downloader;
   private final Dispatcher dispatcher;
-  @Cache.Policy
-  private final int cachePolicy;
+  @Cache.Policy private final int cachePolicy;
   private int retryCount;
 
-  public ResourcesRunnable(@NonNull Downloader downloader, @NonNull Dispatcher dispatcher, @Cache.Policy int policy) {
+  public ResourcesRunnable(@NonNull Downloader downloader, @NonNull Dispatcher dispatcher,
+      @Cache.Policy int policy) {
     this.downloader = downloader;
     this.dispatcher = dispatcher;
     this.cachePolicy = policy;
     this.retryCount = RETRY_COUNT;
   }
 
-  @Override
-  public void run() {
+  @Override public void run() {
     Thread.currentThread().setName(Thread.currentThread().getId() + THREAD_NAME_SUFFIX);
 
     try {
       Resources resources = downloader.load(cachePolicy);
-      if (resources != null) {
+      if (null != resources) {
         dispatcher.dispatchDone(resources);
       } else {
         dispatcher.dispatchFailed(new ExternalResourceException("Resources are null."));
@@ -51,5 +49,4 @@ public final class ResourcesRunnable implements Runnable {
   public boolean canRetry() {
     return retryCount > 0;
   }
-
 }

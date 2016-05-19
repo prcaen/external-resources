@@ -1,11 +1,6 @@
 package fr.prcaen.externalresources.exception;
 
-import java.io.IOException;
-
-public class ExternalResourceException extends IOException {
-
-  public ExternalResourceException() {
-  }
+public class ExternalResourceException extends RuntimeException {
 
   public ExternalResourceException(String detailMessage) {
     super(detailMessage);
@@ -18,5 +13,4 @@ public class ExternalResourceException extends IOException {
   public ExternalResourceException(Throwable cause) {
     super(cause);
   }
-
 }

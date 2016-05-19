@@ -36,9 +36,8 @@ public class NetworkBroadcastReceiver extends BroadcastReceiver {
     context.unregisterReceiver(this);
   }
 
-  @Override
-  public void onReceive(Context context, Intent intent) {
-    if (intent == null) {
+  @Override public void onReceive(Context context, Intent intent) {
+    if (null == intent) {
       return;
     }
 
@@ -48,9 +47,9 @@ public class NetworkBroadcastReceiver extends BroadcastReceiver {
       dispatcher.dispatchAirplaneModeChange(intent.getBooleanExtra(EXTRA_AIRPLANE_STATE, false));
     } else if (CONNECTIVITY_ACTION.equals(action)) {
       NetworkInfo networkInfo = Utils.getActiveNetworkInfo(context);
-      if (null != networkInfo)
+      if (null != networkInfo) {
         dispatcher.dispatchNetworkStateChange(networkInfo);
+      }
     }
   }
-
 }

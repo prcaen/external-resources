@@ -2,7 +2,6 @@ package fr.prcaen.externalresources.model;
 
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -11,14 +10,12 @@ import org.robolectric.annotation.Config;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE)
+@RunWith(RobolectricTestRunner.class) @Config(manifest = Config.NONE)
 public final class DimensionResourceTest {
 
   private DimensionResource resource;
 
-  @Test
-  public void testToFloat() throws Exception {
+  @Test public void testToFloat() throws Exception {
     resource = new DimensionResource(TypedValue.COMPLEX_UNIT_DIP, 2.0f);
 
     DisplayMetrics metrics = new DisplayMetrics();
@@ -26,8 +23,7 @@ public final class DimensionResourceTest {
     assertTrue(resource.toFloat(metrics) == 400.0f);
   }
 
-  @Test
-  public void testFromString() throws Exception {
+  @Test public void testFromString() throws Exception {
     resource = DimensionResource.fromString("16dp");
     assertEquals(resource.value, 16.0f);
     assertEquals(resource.type, TypedValue.COMPLEX_UNIT_DIP);
@@ -61,18 +57,18 @@ public final class DimensionResourceTest {
     assertEquals(resource.type, TypedValue.COMPLEX_UNIT_PX);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testFromStringWithUnknownUnit() throws Exception {
+  @Test(expected = IllegalArgumentException.class) public void testFromStringWithUnknownUnit()
+      throws Exception {
     resource = DimensionResource.fromString("23sd");
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testFromStringWithOnlyUnit() throws Exception {
+  @Test(expected = IllegalArgumentException.class) public void testFromStringWithOnlyUnit()
+      throws Exception {
     resource = DimensionResource.fromString("dp");
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testFromStringWithError() throws Exception {
+  @Test(expected = IllegalArgumentException.class) public void testFromStringWithError()
+      throws Exception {
     resource = DimensionResource.fromString("15$$$*dp");
   }
 }

@@ -2,44 +2,41 @@ package fr.prcaen.externalresources;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.support.annotation.NonNull;
-
 import com.squareup.okhttp.CacheControl;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
 import fr.prcaen.externalresources.converter.Converter;
 import fr.prcaen.externalresources.exception.ExternalResourceException;
 import fr.prcaen.externalresources.exception.ResponseException;
 import fr.prcaen.externalresources.model.Resources;
 import fr.prcaen.externalresources.url.Url;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.HONEYCOMB_MR2;
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 public final class Downloader {
   private static final int CONNECT_TIMEOUT_MILLIS = 15 * 1000; // 15s
   private static final int READ_TIMEOUT_MILLIS = 20 * 1000;    // 20s
   private static final int WRITE_TIMEOUT_MILLIS = 20 * 1000;   // 20s
 
-  @NonNull
-  private final Context context;
-  @NonNull
-  private final OkHttpClient client;
-  @NonNull
-  private final Converter converter;
-  @NonNull
-  private final Url url;
-  @NonNull
-  private final Options options;
+  @NonNull private final Context context;
+  @NonNull private final OkHttpClient client;
+  @NonNull private final Converter converter;
+  @NonNull private final Url url;
+  @NonNull private final Options options;
 
-  public Downloader(@NonNull Context context, @NonNull Converter converter, @NonNull Url url, @NonNull Options options) {
+  public Downloader(@NonNull Context context, @NonNull Converter converter, @NonNull Url url,
+      @NonNull Options options) {
     this(context, new OkHttpClient(), converter, url, options);
   }
 
-  public Downloader(@NonNull Context context, @NonNull OkHttpClient client, @NonNull Converter converter, @NonNull Url url, @NonNull Options options) {
+  public Downloader(@NonNull Context context, @NonNull OkHttpClient client,
+      @NonNull Converter converter, @NonNull Url url, @NonNull Options options) {
     this.context = context.getApplicationContext();
     this.client = client;
     this.url = url;
@@ -75,10 +72,7 @@ public final class Downloader {
 
     Logger.v(ExternalResources.TAG, "CachePolicy: " + policy);
 
-    Request request = new Request.Builder()
-        .url(url.build())
-        .cacheControl(cacheControl)
-        .build();
+    Request request = new Request.Builder().url(url.build()).cacheControl(cacheControl).build();
 
     try {
       Response response = client.newCall(request).execute();
@@ -143,10 +137,6 @@ public final class Downloader {
       url.screenLayout(configuration.screenLayout);
     }
 
-    if (options.isUseScreenLayout()) {
-      url.screenLayout(configuration.screenLayout);
-    }
-
     if (options.isUseTouchscreen()) {
       url.touchscreen(configuration.touchscreen);
     }
@@ -155,11 +145,11 @@ public final class Downloader {
       url.uiMode(configuration.uiMode);
     }
 
-    if (options.isUseDensityDpi() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+    if (options.isUseDensityDpi() && SDK_INT >= JELLY_BEAN_MR1) {
       url.densityDpi(configuration.densityDpi);
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+    if (SDK_INT >= HONEYCOMB_MR2) {
       if (options.isUseScreenWidthDp()) {
         url.screenWidthDp(configuration.screenWidthDp);
       }
@@ -173,5 +163,4 @@ public final class Downloader {
       }
     }
   }
-
 }

@@ -1,16 +1,14 @@
 package fr.prcaen.externalresources.converter;
 
-import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
+import fr.prcaen.externalresources.model.Resource;
+import fr.prcaen.externalresources.model.Resources;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.AbstractMap;
-
-import fr.prcaen.externalresources.model.Resource;
-import fr.prcaen.externalresources.model.Resources;
+import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -25,8 +23,7 @@ public final class XmlConverterTest {
     this.converter = new XmlConverter();
   }
 
-  @Test
-  public void testFromReader() throws Exception {
+  @Test public void testFromReader() throws Exception {
     Resources resources = new XmlConverter().fromReader(resourcesSteamReader);
 
     assertTrue("hello key exists", resources.has("hello"));
@@ -40,29 +37,28 @@ public final class XmlConverterTest {
     assertTrue("bits is array", resources.get("bits").isArray());
   }
 
-  @Test
-  public void testGetFromNodeIgnore() throws Exception {
-    Document doc = XmlConverter.read(new StringReader("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources><test name=\"max_speed\">75</test></resources>"));
-    AbstractMap.SimpleEntry<String, Resource> entry = converter.get(doc.getDocumentElement().getChildNodes().item(0));
+  @Test public void testGetFromNodeIgnore() throws Exception {
+    Document doc = XmlConverter.read(new StringReader(
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?><resources><test name=\"max_speed\">75</test></resources>"));
+    AbstractMap.SimpleEntry<String, Resource> entry =
+        converter.get(doc.getDocumentElement().getChildNodes().item(0));
 
     assertNull(entry);
   }
 
-  @Test
-  public void testGetResourceFromNodeIgnore() throws Exception {
+  @Test public void testGetResourceFromNodeIgnore() throws Exception {
     Resource entry = converter.getResource(String[].class, (Node) null);
 
     assertNull(entry);
   }
 
-  @Test(expected=IOException.class)
-  public void testEmptyString() throws Exception {
+  @Test(expected = IOException.class) public void testEmptyString() throws Exception {
     converter.fromString("");
   }
 
-  @Test
-  public void testFromString() throws Exception {
-    assertNotNull(converter.fromString("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources><test name=\"max_speed\">75</test></resources>"));
+  @Test public void testFromString() throws Exception {
+    assertNotNull(converter.fromString(
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?><resources><test name=\"max_speed\">75</test></resources>"));
   }
 
   /*@Test
