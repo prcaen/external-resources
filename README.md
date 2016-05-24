@@ -1,6 +1,6 @@
 # External Resources
 
-[![Build status](https://api.travis-ci.org/prcaen/external-resources.svg?branch=master)](https://travis-ci.org/prcaen/external-resources)
+[![Build status](https://api.travis-ci.org/prcaen/external-resources.svg?branch=master)](https://travis-ci.org/prcaen/external-resources) [ ![Download](https://api.bintray.com/packages/prcaen/maven/external-resources/images/download.svg) ](https://bintray.com/prcaen/maven/external-resources/_latestVersion)
 
 Update your Android resources (strings, integers, booleans, ...) over the air.
 
@@ -14,6 +14,21 @@ Update your Android resources (strings, integers, booleans, ...) over the air.
 - Event triggered when ressources loading has fail.
 - Define your own converter. Json is the default one. This library also provide a Xml converter.
 - **Tested**: > 120 tests.
+
+## Download
+Via Gradle:
+```gradle
+compile 'fr.pierrickcaen:external-resources:2.0.0'
+```
+
+Via Maven:
+```xml
+<dependency>
+    <groupId>fr.pierrickcaen</groupId>
+    <artifactId>external-resources</artifactId>
+    <version>2.0.0</version>
+</dependency>
+```
 
 ## Usage
 ### Basic
