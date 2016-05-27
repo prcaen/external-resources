@@ -1,0 +1,102 @@
+apply plugin: "com.jfrog.bintray"
+apply plugin: "com.github.dcendents.android-maven"
+
+task sourcesJar(type: Jar) {
+  classifier = 'sources'
+  from android.sourceSets.main.java.srcDirs
+}
+
+task javadoc(type: Javadoc, dependsOn: assembleRelease) {
+  source = android.sourceSets.main.java.srcDirs
+  classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+  classpath += configurations.compile
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+artifacts {
+  archives javadocJar
+  archives sourcesJar
+}
+
+group = GROUP
+version = VERSION_NAME
+
+bintray {
+  user = System.getenv('BINTRAY_USER')
+  key = System.getenv('BINTRAY_KEY')
+  configurations = ['archives']
+
+  dryRun = false
+  publish = true
+
+  pkg {
+    repo = BINTRAY_REPO
+    name = ARTIFACT_ID
+    desc = PROJECT_DESCRIPTION
+    userOrg = DEVELOPER_ID
+    websiteUrl = WEBSITE_URL
+    issueTrackerUrl = ISSUE_TRACKER_URL
+    vcsUrl = WEBSITE_URL
+    licenses = [LICENCE_NAME]
+    githubRepo = GITHUB_REPO
+    githubReleaseNotesFile = RELEASE_NOTES_FILE
+
+    version {
+      name = VERSION_NAME
+      desc = PROJECT_DESCRIPTION
+      vcsTag = VERSION_NAME
+
+      gpg {
+        sign = true
+        passphrase = System.getenv('GPG_PASSWORD')
+      }
+
+      mavenCentralSync {
+        sync = true
+        user = System.getenv('SONATYPE_NEXUS_USERNAME')
+        password = System.getenv('SONATYPE_NEXUS_PASSWORD')
+      }
+    }
+  }
+}
+
+install {
+  repositories.mavenInstaller {
+    pom {
+      project {
+        packaging PACKAGING
+        groupId GROUP
+        artifactId ARTIFACT_ID
+
+        name PROJECT_NAME
+        description PROJECT_DESCRIPTION
+        url WEBSITE_URL
+
+        licenses {
+          license {
+            name LICENCE_NAME
+            url LICENCE_URL
+          }
+        }
+
+        developers {
+          developer {
+            id DEVELOPER_ID
+            name DEVELOPER_NAME
+            email DEVELOPER_EMAIL
+          }
+        }
+
+        scm {
+          connection SCM_CONNECTION
+          developerConnection SCM_CONNECTION
+          url WEBSITE_URL
+        }
+      }
+    }
+  }
+}

@@ -27,6 +27,6 @@ android {
 }
 
 dependencies {
-  compile project(":library")
+  compile project(":external-resources")
   compile "com.android.support:appcompat-v7:${dependenciesVersion.support}"
 }

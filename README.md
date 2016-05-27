@@ -16,9 +16,10 @@ Update your Android resources (strings, integers, booleans, ...) over the air.
 - **Tested**: > 120 tests.
 
 ## Download
+The libary is available on *JCenter* or *MavenCentral*
 Via Gradle:
 ```gradle
-compile 'fr.pierrickcaen:external-resources:2.0.0'
+compile 'fr.pierrickcaen:external-resources:2.0.1'
 ```
 
 Via Maven:
@@ -26,7 +27,7 @@ Via Maven:
 <dependency>
     <groupId>fr.pierrickcaen</groupId>
     <artifactId>external-resources</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
 </dependency>
 ```
 

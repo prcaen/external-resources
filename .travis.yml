@@ -21,4 +21,4 @@ android:
 jdk:
   - oraclejdk7
 script:
-  - ./gradlew library:testDebugUnitTest -i
+  - ./gradlew external-resources:testDebugUnitTest -i
