@@ -87,10 +87,10 @@ public class ExternalResources {
    * Initialize ExternalResources instance with defaults parameters.
    *
    * @param context Any context, will not be retained.
-   * @param url @Url implementation
+   * @param url Url implementation
    * @return ExternalResources instance
    * @throws IllegalArgumentException if context is null or if url is null.
-   * @see @Url
+   * @see Url
    */
   @SuppressWarnings("ConstantConditions") public static ExternalResources initialize(
       @NonNull Context context, Url url) {
@@ -117,7 +117,7 @@ public class ExternalResources {
    * Initialize ExternalResources instance with defaults parameters.
    * eg: If your base url is http://test.com/android-resources.json, it will be append by query
    * parameters:
-   * http://test.com/android-resources.json?locale=fr_FR&density_dpi=320&screen_height_dp=100&navigation_hidden=0&...
+   * http://test.com/android-resources.json?locale=fr_FR&amp;density_dpi=320&amp;screen_height_dp=100&amp;navigation_hidden=0...
    *
    * @param context Any context, will not be retained.
    * @param baseUrl URL string composed of a scheme, host, path and optionally port
@@ -153,7 +153,7 @@ public class ExternalResources {
    * @return ExternalResources instance
    * @throws IllegalArgumentException if singleton of ExternalResources already exists or if
    * externalResources is null.
-   * @see @DefaultUrl
+   * @see DefaultUrl
    */
   @SuppressWarnings("ConstantConditions") public static ExternalResources initialize(
       @NonNull ExternalResources externalResources) {

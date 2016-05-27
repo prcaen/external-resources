@@ -1,9 +1,9 @@
 apply plugin: "com.jfrog.bintray"
-apply plugin: "maven-publish"
+apply plugin: "com.github.dcendents.android-maven"
 
 task sourcesJar(type: Jar) {
   classifier = 'sources'
-  from android.sourceSets.main.java.source
+  from android.sourceSets.main.java.srcDirs
 }
 
 task javadoc(type: Javadoc, dependsOn: assembleRelease) {
@@ -29,9 +29,8 @@ bintray {
   user = System.getenv('BINTRAY_USER')
   key = System.getenv('BINTRAY_KEY')
   configurations = ['archives']
-  publications = ['deploy']
 
-  dryRun = true
+  dryRun = false
   publish = true
 
   pkg {
@@ -65,38 +64,37 @@ bintray {
   }
 }
 
-publishing {
-  publications {
-    deploy(MavenPublication) {
-      groupId GROUP
-      artifactId ARTIFACT_ID
-      version VERSION_NAME
+install {
+  repositories.mavenInstaller {
+    pom {
+      project {
+        packaging PACKAGING
+        groupId GROUP
+        artifactId ARTIFACT_ID
 
-      pom.withXml {
-        asNode().children().last() + {
-          resolveStrategy = Closure.DELEGATE_FIRST
-          name PROJECT_NAME
-          description PROJECT_DESCRIPTION
+        name PROJECT_NAME
+        description PROJECT_DESCRIPTION
+        url WEBSITE_URL
+
+        licenses {
+          license {
+            name LICENCE_NAME
+            url LICENCE_URL
+          }
+        }
+
+        developers {
+          developer {
+            id DEVELOPER_ID
+            name DEVELOPER_NAME
+            email DEVELOPER_EMAIL
+          }
+        }
+
+        scm {
+          connection SCM_CONNECTION
+          developerConnection SCM_CONNECTION
           url WEBSITE_URL
-
-          licenses {
-            license {
-              name LICENCE_NAME
-              url LICENCE_URL
-            }
-          }
-          developers {
-            developer {
-              id DEVELOPER_ID
-              name DEVELOPER_NAME
-              email DEVELOPER_EMAIL
-            }
-          }
-          scm {
-            connection SCM_CONNECTION
-            developerConnection SCM_CONNECTION
-            url WEBSITE_URL
-          }
         }
       }
     }

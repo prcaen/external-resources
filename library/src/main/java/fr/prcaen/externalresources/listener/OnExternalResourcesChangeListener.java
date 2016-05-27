@@ -9,7 +9,7 @@ import fr.prcaen.externalresources.ExternalResources;
 public interface OnExternalResourcesChangeListener {
   /**
    * This is called when external resources are loaded or when configuration changed.
-   * {@see} ExternalResources.Builder#options
+   * @see ExternalResources.Builder#options
    *
    * @param externalResources the ExternalResources instance.
    */

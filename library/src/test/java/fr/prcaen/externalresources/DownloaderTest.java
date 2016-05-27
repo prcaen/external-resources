@@ -26,6 +26,7 @@ import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.HONEYCOMB_MR2;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+import static android.os.Build.VERSION_CODES.KITKAT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static java.util.Locale.US;
 import static junit.framework.Assert.assertEquals;
@@ -36,7 +37,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-@RunWith(RobolectricTestRunner.class) @Config(manifest = "/src/test/AndroidManifest.xml")
+@RunWith(RobolectricTestRunner.class) @Config(manifest = "/src/main/AndroidManifest.xml", sdk = KITKAT)
 public final class DownloaderTest {
   private static final String BASE_URL = "http://test.com";
 
